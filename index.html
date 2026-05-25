@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบศูนย์กลาง & ประกาศของร้าน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            /* ไล่สีพื้นหลังเทา-ส้มอ่อน */
+            background: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 40%, #ffedd5 100%);
+            background-attachment: fixed;
+            color: #334155;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            /* แสงตกกระทบขอบกระจก */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.9);
+            border-left: 1px solid rgba(255, 255, 255, 0.8);
+            /* มิติเงา 2 ชั้น (เทา + ส้มอ่อน) */
+            box-shadow: 0 12px 35px -10px rgba(71, 85, 105, 0.2), 0 4px 15px -5px rgba(234, 88, 12, 0.08);
+            border-radius: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 15px 45px -10px rgba(71, 85, 105, 0.25), 0 5px 20px -5px rgba(234, 88, 12, 0.15);
+        }
+        
+        .glass-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            /* เงายุบตัวด้านในให้ดูมีมิติสมจริง */
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(249, 115, 22, 0.5); }
+        
+        .btn-gradient {
+            /* ปุ่มโทนส้มตัดเทา */
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 60%, #64748b 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.4);
+        }
+        
+        /* สไตล์ป้องกันคนนอกกดลิงก์ */
+        .disabled-link {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row p-2 md:p-4 gap-5">
+
+    <aside class="glass-card w-full md:w-64 p-5 flex flex-col shrink-0 sticky top-4 h-auto md:h-[calc(100vh-2rem)] z-20">
+        <div class="flex items-center gap-3 mb-6 border-b border-gray-400/20 pb-4">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg shadow-orange-500/30">W</div>
+            <h1 class="text-lg font-bold text-gray-800">Web Dashboard</h1>
+        </div>
+
+        <div class="flex-1 overflow-y-auto mb-4 pr-1">
+            <nav id="dynamicMenuContainer" class="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
+                </nav>
+            
+            <button onclick="toggleModal('menuModal')" class="admin-only mt-5 w-full text-sm py-2.5 px-4 rounded-xl border-2 border-dashed border-gray-400/50 text-gray-500 font-medium hover:bg-white/60 hover:text-orange-600 hover:border-orange-300 transition flex items-center justify-center gap-2 hidden">
+                <span>+</span> เพิ่มเมนูระบบ
+            </button>
+        </div>
+
+        <div class="mt-auto pt-4 border-t border-gray-400/20 hidden md:block admin-only hidden">
+            <button onclick="toggleModal('announceModal')" class="btn-gradient w-full text-white py-3 px-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>+</span> เพิ่มประกาศใหม่
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col mx-auto w-full gap-5 max-w-6xl">
+        
+        <header class="glass-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4 z-10">
+            <div class="relative w-full sm:w-1/2">
+                <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                <input type="text" id="searchInput" placeholder="ค้นหาประกาศ, หัวข้อ, คู่มือ..." class="w-full glass-input rounded-full py-2 pl-9 pr-4 text-sm text-gray-700" onkeyup="filterAnnouncements()">
+            </div>
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+                <button onclick="toggleSort()" class="glass-input px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 whitespace-nowrap hover:bg-white/80 transition text-gray-700">
+                    <span id="sortIcon">🔽</span> <span id="sortText">กรอง: ล่าสุด</span>
+                </button>
+                <button onclick="toggleModal('announceModal')" class="admin-only md:hidden btn-gradient text-white px-4 py-2 rounded-full text-sm font-bold shadow-md whitespace-nowrap hidden">
+                    + เพิ่มประกาศ
+                </button>
+            </div>
+        </header>
+
+        <div class="px-2 pt-1 flex justify-between items-end">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">ศูนย์รวมประกาศและคู่มือ</h2>
+                <p class="text-sm text-gray-500 mt-1">รายงานวันนี้: มีงานทั้งหมด <span id="totalTasksCount" class="font-bold text-orange-500 text-base">0</span> รายการ</p>
+            </div>
+        </div>
+
+        <div id="announcementList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-10 items-start">
+            <div class="col-span-full text-center py-12 text-gray-500 font-medium">⏳ กำลังโหลดข้อมูล...</div>
+        </div>
+    </main>
+
+    <aside class="w-full xl:w-72 flex flex-col gap-5 shrink-0">
+        
+        <div class="glass-card p-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full bg-gray-200/80 border border-white flex items-center justify-center text-xl shadow-sm">👤</div>
+                <div id="authProfile" class="font-medium text-gray-700 text-sm flex flex-col">
+                    </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-5">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-sm border-b border-gray-400/20 pb-3">
+                <span class="text-orange-500">🛡️</span> ระดับสิทธิผู้ใช้งาน
+            </h3>
+            <ul class="space-y-3 text-xs text-gray-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                    <span class="text-orange-500 font-bold">1.</span>
+                    <strong>Admin:</strong> เพิ่ม ลบ ประกาศและเมนูได้
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-gray-500 font-bold">2.</span>
+                    <strong>User:</strong> กดเข้าลิงก์เมนูและแนบไฟล์ได้ แต่แก้ไขไม่ได้
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-gray-400 font-bold">3.</span>
+                    <strong>Viewer:</strong> ดูหน้าเว็บได้อย่างเดียว กดลิงก์อะไรไม่ได้เลย
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <div id="loginModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4 transition-opacity">
+        <div class="bg-white/80 backdrop-blur-xl w-full max-w-sm rounded-3xl p-7 shadow-2xl relative border border-white/60">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-5 text-gray-400 hover:text-gray-800 text-lg transition">✕</button>
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-500 text-xl mx-auto mb-3 shadow-inner">🔐</div>
+            <h2 class="text-xl font-bold text-gray-800 mb-1 text-center">เข้าสู่ระบบ</h2>
+            <p class="text-xs text-gray-500 text-center mb-6">กรุณาล็อกอินเพื่อใช้งานฟังก์ชันเพิ่มเติม</p>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อผู้ใช้ (Username)</label>
+                    <input type="text" id="loginUser" required class="w-full glass-input rounded-xl p-3 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">รหัสผ่าน (Password)</label>
+                    <input type="password" id="loginPass" required class="w-full glass-input rounded-xl p-3 text-sm">
+                </div>
+                <p id="loginError" class="text-red-500 text-xs hidden text-center bg-red-50 py-2 rounded-lg border border-red-100">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</p>
+                <button type="submit" class="w-full btn-gradient text-white py-3 rounded-xl font-bold transition text-sm shadow-lg mt-2">
+                    ลงชื่อเข้าใช้
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="menuModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-white/80 backdrop-blur-xl w-full max-w-sm rounded-3xl p-7 shadow-2xl relative border border-white/60">
+            <button onclick="toggleModal('menuModal')" class="absolute top-4 right-5 text-gray-400 hover:text-gray-800 text-lg">✕</button>
+            <h2 class="text-lg font-bold text-gray-800 mb-5 border-b border-gray-200 pb-2">เพิ่มเมนูระบบ</h2>
+            <form id="menuForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อเมนู</label>
+                    <input type="text" id="menuName" required class="w-full glass-input rounded-xl p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ไอคอน (Emoji)</label>
+                    <input type="text" id="menuIcon" required class="w-full glass-input rounded-xl p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ลิงก์ปลายทาง (URL)</label>
+                    <input type="url" id="menuLink" required class="w-full glass-input rounded-xl p-2.5 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold transition text-sm shadow-md mt-2">บันทึกเมนู</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="announceModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-white/80 backdrop-blur-xl w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl p-7 shadow-2xl relative border border-white/60">
+            <button onclick="toggleModal('announceModal')" class="absolute top-4 right-5 text-gray-400 hover:text-gray-800 text-lg">✕</button>
+            <h2 class="text-xl font-bold text-gray-800 mb-5 border-b border-gray-200 pb-2 text-orange-600">สร้างประกาศ / งานใหม่</h2>
+            <form id="announceForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">หัวข้อประกาศ <span class="text-red-500">*</span></label>
+                    <input type="text" id="annTitle" required class="w-full glass-input rounded-xl p-3 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">รายละเอียด <span class="text-red-500">*</span></label>
+                    <textarea id="annContent" required rows="4" class="w-full glass-input rounded-xl p-3 text-sm"></textarea>
+                </div>
+                <div class="p-4 bg-gray-100/50 rounded-2xl border border-white/80 shadow-inner">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">แนบลิงก์ (เอกสาร/วิดีโอ)</label>
+                    <input type="url" id="annLink" placeholder="วาง URL จาก Drive หรือ YouTube" class="w-full glass-input rounded-xl p-2.5 text-sm mb-3">
+                    
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อปุ่มลิงก์</label>
+                    <input type="text" id="annLinkName" placeholder="เช่น กดดูเอกสารคู่มือ" class="w-full glass-input rounded-xl p-2.5 text-sm">
+                </div>
+                <button type="submit" class="w-full btn-gradient text-white py-3.5 rounded-xl font-bold shadow-lg transition text-sm mt-4">โพสต์ประกาศ</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ================= สคริปต์การทำงานคงเดิม =================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxU7_w9v0sqAYxXFXCkWwZSAukM4f4EFdYB2G3AZu_9EAvf9_CDDT6uoCmymxwzP0gaJA/exec";
+        let announcements = [];
+        let menus = [];
+        let isSortNewestFirst = true;
+
+        let currentRole = localStorage.getItem('storeRole') || 'viewer';
+
+        function updateUIByRole() {
+            const adminEls = document.querySelectorAll('.admin-only');
+            const authProfile = document.getElementById('authProfile');
+
+            if (currentRole === 'admin') {
+                adminEls.forEach(el => el.classList.remove('hidden'));
+                authProfile.innerHTML = `
+                    <span class="text-orange-600 font-bold">👑 Admin (ผู้ดูแล)</span>
+                    <button onclick="logout()" class="text-gray-400 text-[11px] font-semibold hover:text-red-500 transition text-left mt-0.5">ออกจากระบบ</button>
+                `;
+            } else if (currentRole === 'user') {
+                adminEls.forEach(el => el.classList.add('hidden'));
+                authProfile.innerHTML = `
+                    <span class="text-gray-700 font-bold">👤 พนักงาน (User)</span>
+                    <button onclick="logout()" class="text-gray-400 text-[11px] font-semibold hover:text-red-500 transition text-left mt-0.5">ออกจากระบบ</button>
+                `;
+            } else { 
+                adminEls.forEach(el => el.classList.add('hidden'));
+                authProfile.innerHTML = `
+                    <span class="text-gray-500">สถานะ: ผู้เยี่ยมชม</span>
+                    <button onclick="toggleModal('loginModal')" class="mt-1.5 btn-gradient text-white px-4 py-1.5 rounded-full text-xs font-bold transition w-fit shadow-md">เข้าสู่ระบบ</button>
+                `;
+            }
+
+            renderMenus(); 
+            filterAnnouncements(); 
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const err = document.getElementById('loginError');
+
+            if (u === 'admin' && p === '1234') {
+                currentRole = 'admin';
+                finishLogin(err, e.target);
+            } else if (u === 'user' && p === '1234') {
+                currentRole = 'user';
+                finishLogin(err, e.target);
+            } else {
+                err.classList.remove('hidden');
+            }
+        });
+
+        function finishLogin(errEl, formEl) {
+            localStorage.setItem('storeRole', currentRole);
+            errEl.classList.add('hidden');
+            formEl.reset();
+            toggleModal('loginModal');
+            updateUIByRole();
+        }
+
+        window.logout = function() {
+            if(confirm('ต้องการออกจากระบบหรือไม่?')) {
+                currentRole = 'viewer';
+                localStorage.setItem('storeRole', currentRole);
+                updateUIByRole();
+            }
+        }
+
+        window.viewerAlert = function(e) {
+            if (currentRole === 'viewer') {
+                e.preventDefault();
+                alert('⚠️ สำหรับพนักงานเท่านั้น! กรุณาเข้าสู่ระบบก่อน');
+            }
+        }
+
+        function loadMenus() {
+            const savedMenus = localStorage.getItem('storeMenus');
+            if (savedMenus) {
+                menus = JSON.parse(savedMenus);
+            } else {
+                menus = [
+                    { id: 1, name: 'หน้าหลัก', icon: '🏠', url: '#' },
+                    { id: 2, name: 'คู่มือการทำงาน', icon: '📁', url: 'https://drive.google.com/drive/folders/1E8R4Bozgm4IXHMRWSNuh4GIYdExNxKXE?usp=sharing' }
+                ];
+                saveMenus();
+            }
+        }
+
+        function saveMenus() { localStorage.setItem('storeMenus', JSON.stringify(menus)); }
+
+        function renderMenus() {
+            const container = document.getElementById('dynamicMenuContainer');
+            container.innerHTML = '';
+            
+            menus.forEach(menu => {
+                const isViewer = currentRole === 'viewer';
+                const href = isViewer ? '#' : menu.url;
+                const linkClick = isViewer ? 'onclick="viewerAlert(event)"' : '';
+                const cssLink = isViewer ? 'disabled-link hover:bg-transparent text-gray-400' : (menu.url === '#' ? 'bg-white/60 shadow-sm border border-white text-gray-800' : 'text-gray-600 hover:bg-white/50 border border-transparent');
+                
+                const btnHtml = `
+                    <div class="relative group flex items-center mb-1">
+                        <a href="${href}" target="${(!isViewer && menu.url !== '#') ? '_blank' : '_self'}" ${linkClick} class="w-full px-4 py-3 rounded-xl text-sm font-medium transition whitespace-nowrap flex items-center gap-3 ${cssLink}">
+                            <span class="drop-shadow-sm">${menu.icon}</span> ${menu.name}
+                        </a>
+                        ${(currentRole === 'admin' && menu.id > 2) ? `<button onclick="deleteMenu(${menu.id})" class="absolute right-2 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm">✕</button>` : ''}
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', btnHtml);
+            });
+        }
+
+        window.deleteMenu = function(id) {
+            if(confirm('ลบเมนูนี้?')) { menus = menus.filter(m => m.id !== id); saveMenus(); renderMenus(); }
+        }
+
+        document.getElementById('menuForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            menus.push({
+                id: Date.now(),
+                name: document.getElementById('menuName').value,
+                icon: document.getElementById('menuIcon').value,
+                url: document.getElementById('menuLink').value
+            });
+            saveMenus(); renderMenus(); e.target.reset(); toggleModal('menuModal');
+        });
+
+        async function fetchAnnouncements() {
+            const cachedData = localStorage.getItem('storeAnns');
+            if (cachedData) { announcements = JSON.parse(cachedData); filterAnnouncements(); }
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                if(data && Array.isArray(data)) {
+                    announcements = data;
+                    localStorage.setItem('storeAnns', JSON.stringify(data));
+                    filterAnnouncements();
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        window.filterAnnouncements = function() {
+            const text = (document.getElementById('searchInput').value || '').toLowerCase();
+            const listContainer = document.getElementById('announcementList');
+            listContainer.innerHTML = '';
+            
+            let displayData = announcements.filter(ann => {
+                return (ann.Title || ann.title || '').toLowerCase().includes(text) || (ann.Content || ann.content || '').toLowerCase().includes(text);
+            });
+
+            document.getElementById('totalTasksCount').textContent = displayData.length;
+
+            if (displayData.length === 0) {
+                listContainer.innerHTML = '<div class="col-span-full py-12 text-center text-gray-500 font-medium">ไม่พบข้อมูล</div>';
+                return;
+            }
+
+            displayData.sort((a, b) => {
+                const tA = new Date(a.Timestamp || a.timestamp || 0).getTime();
+                const tB = new Date(b.Timestamp || b.timestamp || 0).getTime();
+                return isSortNewestFirst ? (tB - tA) : (tA - tB);
+            });
+
+            displayData.forEach(ann => {
+                const title = ann.Title || ann.title || '';
+                const content = ann.Content || ann.content || '';
+                const link = ann.Link || ann.Url || ann.link || ann.url || '';
+                const linkName = ann.LinkName || 'เปิดเอกสาร';
+                let timeStr = 'เพิ่งโพสต์';
+                if(ann.Timestamp || ann.timestamp) {
+                    const d = new Date(ann.Timestamp || ann.timestamp);
+                    if(!isNaN(d.getTime())) timeStr = d.toLocaleDateString('th-TH');
+                }
+
+                const isViewer = currentRole === 'viewer';
+                let linkHTML = '';
+                if (link) {
+                    const href = isViewer ? '#' : link;
+                    const linkClick = isViewer ? 'onclick="viewerAlert(event)"' : '';
+                    const cssBtn = isViewer ? 'disabled-link' : 'hover:bg-orange-500 hover:text-white border-orange-200 text-orange-600 bg-orange-50';
+                    linkHTML = `
+                        <div class="mt-auto pt-3 border-t border-gray-200/50">
+                            <a href="${href}" target="${!isViewer ? '_blank' : '_self'}" ${linkClick} class="px-2 py-2 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1 w-full truncate border shadow-sm ${cssBtn}">
+                                <span>📎</span> ${linkName}
+                            </a>
+                        </div>
+                    `;
+                }
+
+                const cardHTML = `
+                    <div class="glass-card p-3.5 transition hover:shadow-xl bg-white/60 relative overflow-hidden flex flex-col h-[180px] group">
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-gray-400 to-orange-500 shadow-[2px_0_5px_rgba(234,88,12,0.3)]"></div>
+                        <div class="pl-2.5 flex flex-col h-full">
+                            <div class="text-gray-400 text-[10px] mb-1.5 font-medium">🕒 ${timeStr}</div>
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 mb-1.5 leading-snug group-hover:text-orange-600 transition-colors">${title}</h3>
+                            <p class="text-gray-500 text-[11px] leading-relaxed whitespace-pre-wrap line-clamp-3 mb-2 flex-1">${content}</p>
+                            ${linkHTML}
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        window.toggleSort = function() {
+            isSortNewestFirst = !isSortNewestFirst;
+            document.getElementById('sortIcon').textContent = isSortNewestFirst ? '🔽' : '🔼';
+            document.getElementById('sortText').textContent = isSortNewestFirst ? 'กรอง: ล่าสุด' : 'กรอง: เก่าสุด';
+            filterAnnouncements(); 
+        }
+
+        document.getElementById('announceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '⏳ กำลังบันทึก...'; btn.disabled = true;
+
+            const title = document.getElementById('annTitle').value;
+            const content = document.getElementById('annContent').value;
+            const link = document.getElementById('annLink').value;
+            const linkName = document.getElementById('annLinkName').value || 'เปิดเอกสาร';
+
+            const formData = new FormData();
+            formData.append('title', title); formData.append('content', content);
+            formData.append('link', link); formData.append('linkName', linkName);
+
+            announcements.unshift({ Title: title, Content: content, Link: link, LinkName: linkName, Timestamp: new Date().toISOString() });
+            filterAnnouncements();
+            
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: formData });
+                localStorage.setItem('storeAnns', JSON.stringify(announcements));
+            } catch (error) { console.error(error); } 
+            finally {
+                e.target.reset(); btn.innerHTML = 'โพสต์ประกาศ'; btn.disabled = false; toggleModal('announceModal');
+            }
+        });
+
+        window.toggleModal = function(modalId) { 
+            const el = document.getElementById(modalId);
+            el.classList.toggle('hidden');
+        }
+
+        // Start
+        loadMenus();
+        updateUIByRole();
+        fetchAnnouncements();
+    </script>
+</body>
+</html>
