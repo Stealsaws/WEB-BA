@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ศูนย์ประสานงานสาขา</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --o50:#fff7ed;--o100:#ffedd5;--o200:#fed7aa;--o300:#fdba74;
+  --o400:#fb923c;--o500:#f97316;--o600:#ea580c;--o700:#c2410c;
+  --bg:#fdf6ee;--surface:rgba(255,255,255,.88);--surface2:#ffffff;
+  --border:rgba(234,88,12,.15);--border2:#e5e5e5;
+  --tx1:#1a1a1a;--tx2:#525252;--tx3:#a3a3a3;
+  --red:#ef4444;--green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--yellow:#f59e0b;
+  --sh:0 4px 16px -4px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);
+  --sho:0 6px 24px -4px rgba(234,88,12,.32);
+  --shd:0 20px 60px -10px rgba(0,0,0,.2);
+  --r:14px;--r2:10px;--r3:8px;
+}
+[data-theme="dark"]{
+  --bg:#111;--surface:rgba(30,30,30,.9);--surface2:#1e1e1e;
+  --border:rgba(251,146,60,.2);--border2:#2a2a2a;
+  --tx1:#f5f5f5;--tx2:#a3a3a3;--tx3:#525252;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--tx1);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 45% at 0% 0%,rgba(251,146,60,.16) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 40% at 100% 90%,rgba(253,186,116,.1) 0%,transparent 55%)}
+[data-theme="dark"] body::before{opacity:.4}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--o300);border-radius:9px}
+
+/* ===== LAYOUT ===== */
+#wrap{position:relative;z-index:1;display:flex;gap:14px;padding:14px;max-width:1700px;margin:0 auto}
+#main{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+#rcol{width:256px;min-width:256px;display:flex;flex-direction:column;gap:12px}
+
+/* ===== GLASS / CARD ===== */
+.glass{background:var(--surface);backdrop-filter:blur(22px) saturate(1.5);
+  border:1px solid var(--border);box-shadow:var(--sh)}
+.card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
+  box-shadow:var(--sh)}
+
+/* ===== SIDEBAR ===== */
+#sb{width:224px;min-width:224px;position:sticky;top:14px;height:calc(100vh - 28px);
+  display:flex;flex-direction:column;border-radius:20px;overflow:hidden}
+.sb-top{padding:18px 16px;background:linear-gradient(145deg,#c2410c 0%,#ea580c 45%,#f97316 75%,#fb923c 100%);
+  position:relative;overflow:hidden;flex-shrink:0}
+.sb-top::before{content:'';position:absolute;top:-28px;right:-18px;width:90px;height:90px;background:rgba(255,255,255,.11);border-radius:50%}
+.sb-top::after{content:'';position:absolute;bottom:-22px;left:-12px;width:70px;height:70px;background:rgba(255,255,255,.07);border-radius:50%}
+.sb-logo{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  border:1px solid rgba(255,255,255,.3);flex-shrink:0}
+.sb-mid{flex:1;overflow-y:auto;padding:10px 8px}
+.sb-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx3);padding:8px 8px 4px}
+.mi{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;
+  font-size:12.5px;font-weight:500;color:var(--tx2);cursor:pointer;
+  transition:all .18s;border:1px solid transparent;text-decoration:none;margin-bottom:1px;position:relative}
+.mi:hover{background:rgba(249,115,22,.09);color:var(--o600);border-color:rgba(249,115,22,.18)}
+.mi.active{background:rgba(249,115,22,.12);color:var(--o600);border-color:rgba(249,115,22,.2);font-weight:600}
+.mi .ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.mi .xbtn{display:none;position:absolute;right:6px;width:20px;height:20px;border-radius:5px;
+  background:rgba(239,68,68,.1);color:var(--red);border:none;cursor:pointer;font-size:10px;
+  align-items:center;justify-content:center;transition:all .15s}
+.mi:hover .xbtn{display:flex}
+.mi .xbtn:hover{background:var(--red);color:#fff}
+.sb-bot{padding:10px;border-top:1px solid var(--border);flex-shrink:0}
+.addbtn{width:100%;background:transparent;border:1.5px dashed rgba(251,146,60,.45);
+  color:var(--o500);border-radius:10px;padding:8px;font-size:12px;font-weight:500;
+  font-family:'Prompt',sans-serif;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
+.addbtn:hover{background:rgba(249,115,22,.07);border-color:var(--o400)}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 16px;border-radius:var(--r2);font-size:13px;font-weight:600;
+  font-family:'Prompt',sans-serif;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn-o{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:var(--sho)}
+.btn-o:hover{transform:translateY(-1px);box-shadow:0 8px 26px -4px rgba(234,88,12,.5)}
+.btn-o:active{transform:none}
+.btn-ghost{background:var(--surface2);border:1.5px solid var(--border);color:var(--o600)}
+.btn-ghost:hover{border-color:var(--o400);box-shadow:0 3px 10px -2px rgba(234,88,12,.2)}
+.btn-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:var(--r3)}
+.btn-lg{padding:11px 22px;font-size:14px}
+.btn-fw{width:100%}
+.btn-pill{border-radius:50px}
+.btn-ic{padding:0;width:32px;height:32px;border-radius:var(--r3)}
+
+/* ===== INPUTS ===== */
+.inp{width:100%;background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:var(--r2);padding:9px 13px;font-size:13px;font-family:'Prompt',sans-serif;
+  color:var(--tx1);transition:all .2s;outline:none}
+.inp:focus{border-color:var(--o500);box-shadow:0 0 0 3px rgba(249,115,22,.13)}
+.inp::placeholder{color:var(--tx3)}
+select.inp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;appearance:none}
+.lbl{display:block;font-size:11.5px;font-weight:700;color:var(--o700);margin-bottom:5px;letter-spacing:.02em}
+.fsec{background:var(--o50);border-radius:12px;padding:13px;border:1px solid rgba(234,88,12,.12)}
+[data-theme="dark"] .fsec{background:rgba(251,146,60,.05)}
+
+/* ===== TOPBAR ===== */
+#topbar{border-radius:var(--r);padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.srch{position:relative;flex:1;min-width:180px}
+.srch input{padding-left:38px;border-radius:50px;background:var(--surface2)}
+.srch-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--o400);font-size:14px;pointer-events:none}
+
+/* ===== FILTER TABS ===== */
+#filterBar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ftab{padding:5px 13px;border-radius:50px;font-size:12px;font-weight:600;
+  font-family:'Prompt',sans-serif;border:1.5px solid var(--border2);
+  background:var(--surface2);color:var(--tx2);cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:5px}
+.ftab:hover{border-color:var(--o400);color:var(--o600)}
+.ftab.on{background:linear-gradient(135deg,rgba(249,115,22,.14),rgba(234,88,12,.08));
+  color:var(--o600);border-color:rgba(249,115,22,.3)}
+.ftab .cnt{background:rgba(234,88,12,.15);color:var(--o600);border-radius:50px;
+  padding:1px 7px;font-size:10px;font-weight:700}
+.ftab.on .cnt{background:var(--o500);color:#fff}
+
+/* ===== CATEGORY COLORS ===== */
+.cat-urgent  {--cc:#ef4444;--cl:rgba(239,68,68,.08);--cb:rgba(239,68,68,.2)}
+.cat-general {--cc:#f97316;--cl:rgba(249,115,22,.08);--cb:rgba(249,115,22,.2)}
+.cat-training{--cc:#8b5cf6;--cl:rgba(139,92,246,.08);--cb:rgba(139,92,246,.2)}
+.cat-promo   {--cc:#22c55e;--cl:rgba(34,197,94,.08);--cb:rgba(34,197,94,.2)}
+.cat-meeting {--cc:#3b82f6;--cl:rgba(59,130,246,.08);--cb:rgba(59,130,246,.2)}
+.cat-info    {--cc:#f59e0b;--cl:rgba(245,158,11,.08);--cb:rgba(245,158,11,.2)}
+
+/* ===== ANN CARDS ===== */
+#annGrid.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding-bottom:24px}
+#annGrid.list-view{display:flex;flex-direction:column;gap:8px;padding-bottom:24px}
+
+.ann-card{background:var(--surface2);border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--border2);transition:transform .25s cubic-bezier(.34,1.3,.64,1),box-shadow .25s;
+  box-shadow:0 2px 8px -2px rgba(0,0,0,.08);position:relative;cursor:default}
+.ann-card::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);
+  transform:translateX(-130%);transition:transform .5s;z-index:2;pointer-events:none}
+[data-theme="dark"] .ann-card::before{background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.08) 50%,transparent 70%)}
+.ann-card:hover::before{transform:translateX(130%)}
+.ann-card:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 12px 32px -6px rgba(0,0,0,.14),0 0 0 1px var(--cc,var(--o400))}
+.ann-card.pinned{border-color:var(--o400);box-shadow:0 0 0 2px rgba(249,115,22,.25),0 4px 16px -4px rgba(234,88,12,.2)}
+.ann-card.expired{opacity:.55;filter:saturate(.6)}
+
+/* grid card */
+.ann-card .cat-bar{height:5px;background:var(--cc,var(--o500))}
+.ann-card .body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
+
+/* list card */
+.list-view .ann-card .cat-bar{width:5px;height:auto;position:absolute;left:0;top:0;bottom:0;border-radius:var(--r) 0 0 var(--r)}
+.list-view .ann-card .body{flex-direction:row;align-items:center;gap:12px;padding:12px 14px 12px 19px}
+.list-view .ann-card .body-left{flex:1;min-width:0}
+.list-view .ann-card .body-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.list-view .ann-card:hover{transform:translateX(3px) scale(1);}
+
+.pin-badge{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#fb923c,#ea580c);
+  color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;z-index:3;
+  display:flex;align-items:center;gap:3px}
+.ann-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ann-date{font-size:10px;font-weight:600;color:var(--cc,var(--o500));display:flex;align-items:center;gap:4px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--cc,var(--o400));box-shadow:0 0 5px var(--cc,rgba(249,115,22,.5));flex-shrink:0}
+.ann-title{font-size:13px;font-weight:700;color:var(--tx1);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .18s}
+.ann-card:hover .ann-title{color:var(--cc,var(--o600))}
+.list-view .ann-title{-webkit-line-clamp:1}
+.ann-txt{font-size:11.5px;color:var(--tx2);line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.list-view .ann-txt{-webkit-line-clamp:1}
+.ann-foot{border-top:1px solid var(--cb,rgba(249,115,22,.12));padding-top:8px;display:flex;flex-direction:column;gap:5px;margin-top:auto}
+.list-view .ann-foot{border-top:none;padding-top:0;margin-top:0;flex-direction:row}
+
+/* status badge */
+.sbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700}
+.sbadge.new     {background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
+.sbadge.ongoing {background:rgba(245,158,11,.12);color:#d97706;border:1px solid rgba(245,158,11,.25)}
+.sbadge.done    {background:rgba(34,197,94,.12); color:#16a34a;border:1px solid rgba(34,197,94,.25)}
+.sbadge.expired {background:rgba(163,163,163,.12);color:#737373;border:1px solid rgba(163,163,163,.25)}
+
+/* cat badge */
+.cbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:50px;
+  font-size:10px;font-weight:700;background:var(--cl);color:var(--cc);border:1px solid var(--cb)}
+
+/* link button */
+.lbtn{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:var(--r3);
+  font-size:11px;font-weight:700;color:var(--cc,var(--o600));
+  background:var(--cl,rgba(249,115,22,.08));border:1.5px solid var(--cb,rgba(249,115,22,.2));
+  text-decoration:none;transition:all .22s;position:relative;overflow:hidden}
+.lbtn::before{content:'';position:absolute;inset:0;background:var(--cc,var(--o500));opacity:0;transition:opacity .22s}
+.lbtn:hover::before{opacity:1}
+.lbtn:hover{color:#fff;border-color:transparent;box-shadow:0 4px 14px -3px var(--cc,rgba(234,88,12,.4))}
+.lbtn span,.lbtn svg{position:relative;z-index:1}
+.lbtn svg{width:14px;height:14px;flex-shrink:0;transition:transform .22s}
+.lbtn:hover svg{transform:translateX(2px)}
+.lbtn.dis{opacity:.4;pointer-events:none}
+
+/* admin actions on card */
+.card-acts{display:flex;gap:4px}
+.ca{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;
+  font-family:'Prompt',sans-serif;border:none;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:4px}
+.ca.pin  {background:rgba(249,115,22,.1);color:var(--o600)}
+.ca.pin:hover{background:var(--o500);color:#fff}
+.ca.edit {background:rgba(59,130,246,.1);color:#3b82f6}
+.ca.edit:hover{background:#3b82f6;color:#fff}
+.ca.del  {background:rgba(239,68,68,.08);color:var(--red)}
+.ca.del:hover{background:var(--red);color:#fff}
+
+/* branch chips */
+.bchip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:50px;
+  font-size:10px;font-weight:600;background:rgba(59,130,246,.1);color:#3b82f6;
+  border:1px solid rgba(59,130,246,.22)}
+
+/* unread dot */
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 6px rgba(59,130,246,.6);flex-shrink:0}
+.nb{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;
+  border-radius:50px;font-size:10px;font-weight:800;padding:1px 5px;min-width:16px;
+  text-align:center;border:2px solid var(--bg);line-height:1.3}
+
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+.ann-card{animation:cardIn .3s cubic-bezier(.34,1.2,.64,1) both}
+
+/* ===== RIGHT COL ===== */
+.sec{border-radius:var(--r);padding:16px}
+.profav{width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--o200),var(--o300));
+  border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;
+  font-size:20px;box-shadow:var(--sho);flex-shrink:0}
+[data-theme="dark"] .profav{border-color:var(--border2)}
+.rdot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.rdot.admin{background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;box-shadow:0 2px 8px rgba(234,88,12,.3)}
+.rdot.user {background:linear-gradient(135deg,#fdba74,#fb923c);color:#fff}
+.rdot.viewer{background:var(--border2);color:var(--tx2)}
+.rb{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:50px;font-size:11px;font-weight:700}
+.rb.admin {background:rgba(234,88,12,.1); color:var(--o600);border:1px solid rgba(234,88,12,.2)}
+.rb.user  {background:rgba(251,146,60,.1);color:var(--o500);border:1px solid rgba(251,146,60,.2)}
+.rb.viewer{background:var(--border2);color:var(--tx2);border:1px solid var(--border2)}
+
+/* ===== STAT CARDS ===== */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat-box{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:10px 12px;text-align:center}
+.stat-box .sv{font-size:22px;font-weight:800;color:var(--o500)}
+.stat-box .sl{font-size:10px;color:var(--tx3);margin-top:2px}
+
+/* ===== MODALS ===== */
+.mbk{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
+  z-index:100;display:flex;align-items:center;justify-content:center;padding:14px}
+.mbk.h{display:none}
+.mbox{background:var(--surface2);border-radius:20px;padding:26px;width:100%;max-width:440px;
+  box-shadow:var(--shd);position:relative;animation:mIn .24s cubic-bezier(.34,1.5,.64,1);
+  border:1px solid var(--border2);max-height:90vh;overflow-y:auto}
+.mbox.w{max-width:540px}
+.mbox.xl{max-width:720px}
+@keyframes mIn{from{opacity:0;transform:scale(.91) translateY(16px)}to{opacity:1;transform:none}}
+.mcl{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;
+  background:var(--border2);border:none;cursor:pointer;color:var(--tx2);font-size:12px;
+  display:flex;align-items:center;justify-content:center;transition:all .18s}
+.mcl:hover{background:var(--tx3);color:#fff}
+.mhero{width:50px;height:50px;border-radius:15px;background:linear-gradient(135deg,var(--o50),var(--o100));
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+[data-theme="dark"] .mhero{background:rgba(251,146,60,.15)}
+
+/* ===== USER TABLE ===== */
+.urow{display:grid;grid-template-columns:38px 1fr 100px 80px 64px;
+  align-items:center;gap:8px;padding:9px 10px;border-radius:10px;transition:background .15s}
+.urow:hover{background:rgba(249,115,22,.05)}
+.urow.hd{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--tx3);border-bottom:1px solid var(--border2);padding-bottom:6px;margin-bottom:2px}
+.urow.hd:hover{background:transparent}
+.uav{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.uav.admin {background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;box-shadow:0 2px 8px rgba(234,88,12,.3)}
+.uav.user  {background:linear-gradient(135deg,#fdba74,#fb923c);color:#fff}
+.uav.viewer{background:var(--border2);color:var(--tx2)}
+.ua{width:26px;height:26px;border-radius:7px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .15s}
+.ua.e{background:rgba(59,130,246,.1);color:#3b82f6}
+.ua.e:hover{background:#3b82f6;color:#fff}
+.ua.d{background:rgba(239,68,68,.08);color:var(--red)}
+.ua.d:hover{background:var(--red);color:#fff}
+
+/* ===== DASHBOARD ===== */
+.chart-bar-wrap{display:flex;flex-direction:column;gap:6px}
+.chart-bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.chart-bar-lbl{width:80px;text-align:right;color:var(--tx2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-bar-track{flex:1;height:20px;background:var(--border2);border-radius:50px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--o400),var(--o600));transition:width .6s cubic-bezier(.34,1,.64,1)}
+.chart-bar-val{width:28px;font-size:11px;font-weight:700;color:var(--o600);text-align:right}
+
+/* ===== UPLOAD AREA ===== */
+.upload-zone{border:2px dashed rgba(249,115,22,.35);border-radius:12px;padding:20px;
+  text-align:center;cursor:pointer;transition:all .2s;background:rgba(249,115,22,.03)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--o500);background:rgba(249,115,22,.07)}
+.upload-zone input{display:none}
+.file-chip{display:flex;align-items:center;gap:6px;background:var(--o50);border:1px solid rgba(249,115,22,.2);
+  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--o600);margin-top:4px}
+[data-theme="dark"] .file-chip{background:rgba(249,115,22,.1)}
+.file-chip .rem{background:none;border:none;cursor:pointer;color:var(--red);font-size:13px;margin-left:auto;padding:0}
+
+/* ===== HISTORY ===== */
+.hist-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border2);font-size:12px;color:var(--tx2)}
+.hist-item:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--o400);margin-top:4px;flex-shrink:0}
+
+/* ===== MISC ===== */
+.hidden{display:none!important}
+.tgl-row{display:flex;align-items:center;gap:8px}
+.tgl{width:36px;height:20px;border-radius:50px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tgl.on{background:var(--o500)}
+.tgl::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl.on::after{transform:translateX(16px)}
+.branch-tag-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.btag{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.1);color:#3b82f6;
+  border:1px solid rgba(59,130,246,.22);border-radius:50px;padding:3px 9px;font-size:11px;font-weight:600}
+.btag .rx{background:none;border:none;cursor:pointer;color:var(--red);font-size:11px;padding:0;line-height:1}
+.page-ti{font-size:20px;font-weight:800;color:var(--tx1);display:flex;align-items:center;gap:11px}
+.ptico{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#fb923c,#ea580c);
+  display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:var(--sho);flex-shrink:0}
+@media(max-width:1100px){#rcol{display:none}}
+@media(max-width:768px){
+  #wrap{flex-direction:column;padding:8px;gap:8px}
+  #sb{width:100%;min-width:unset;height:auto;position:relative;top:0}
+  .sb-mid nav{display:flex;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .sb-mid .sb-lbl{display:none}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sb" class="glass">
+  <div class="sb-top">
+    <div style="display:flex;align-items:center;gap:11px;position:relative;z-index:1">
+      <div class="sb-logo">🏢</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;line-height:1.2">ศูนย์ประสานงาน</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:1px">Branch Hub</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-mid">
+    <div class="sb-lbl">เมนูหลัก</div>
+    <nav id="menuContainer"></nav>
+    <button onclick="openM('addMenuM')" class="addbtn admin-only hidden">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>เพิ่มเมนู
+    </button>
+  </div>
+  <div class="sb-bot admin-only hidden" style="flex-direction:column;gap:6px">
+    <button onclick="openAddAnn()" class="btn btn-o btn-fw" style="border-radius:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>เพิ่มประกาศ
+    </button>
+    <button onclick="openM('userMgmtM')" class="btn btn-ghost btn-fw" style="border-radius:10px" id="userMgmtBtn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      จัดการผู้ใช้งาน
+    </button>
+    <button onclick="openM('branchMgmtM')" class="btn btn-ghost btn-fw" style="border-radius:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      จัดการสาขา
+    </button>
+    <button onclick="openM('dashM')" class="btn btn-ghost btn-fw" style="border-radius:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main id="main">
+  <!-- Topbar -->
+  <div id="topbar" class="glass">
+    <div class="srch">
+      <span class="srch-ic">🔍</span>
+      <input type="text" id="searchQ" class="inp" placeholder="ค้นหาประกาศ..." onkeyup="renderCards()" style="border-radius:50px">
+    </div>
+    <!-- view toggle -->
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-ic btn-ghost" id="gridBtn" onclick="setView('grid')" title="Grid">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="btn btn-ic btn-ghost" id="listBtn" onclick="setView('list')" title="List">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+    </div>
+    <button onclick="toggleSort()" class="btn btn-ghost btn-pill btn-sm" style="gap:4px">
+      <span id="sortIco">↓</span><span id="sortTxt">ล่าสุด</span>
+    </button>
+    <!-- dark mode -->
+    <button onclick="toggleDark()" class="btn btn-ic btn-ghost" title="Dark Mode" id="darkBtn">🌙</button>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stat-row" id="statRow"></div>
+
+  <!-- Filter bar -->
+  <div id="filterBar"></div>
+
+  <!-- Title -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px">
+    <div>
+      <h2 class="page-ti"><div class="ptico">📋</div><span>ศูนย์รวมประกาศ</span></h2>
+      <div style="font-size:12px;color:var(--tx3);margin-top:4px;padding-left:51px">
+        แสดง <strong id="showCount" style="color:var(--o500)">0</strong> รายการ
+        <span id="branchLabel" style="color:var(--o600);font-weight:600"></span>
+      </div>
+    </div>
+    <button onclick="exportCSV()" class="btn btn-ghost btn-sm admin-only hidden">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <!-- Cards -->
+  <div id="annGrid" class="grid-view"></div>
+</main>
+
+<!-- ===== RIGHT COL ===== -->
+<aside id="rcol">
+  <div class="glass sec">
+    <div style="display:flex;align-items:center;gap:11px">
+      <div class="profav">👤</div>
+      <div id="profInfo" style="flex:1;min-width:0"></div>
+    </div>
+  </div>
+  <div class="glass sec">
+    <div style="font-size:13px;font-weight:700;color:var(--tx1);margin-bottom:11px;display:flex;align-items:center;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      🛡️ ระดับสิทธิ์
+    </div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px">
+        <div class="rdot admin">A</div>
+        <div><div style="font-weight:700;font-size:12.5px">Admin</div><div style="color:var(--tx3);font-size:10.5px">จัดการทุกอย่างได้</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px">
+        <div class="rdot user">U</div>
+        <div><div style="font-weight:700;font-size:12.5px">User</div><div style="color:var(--tx3);font-size:10.5px">เปิดลิงก์ / โหลดไฟล์ / ส่งไฟล์กลับ</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px">
+        <div class="rdot viewer">V</div>
+        <div><div style="font-weight:700;font-size:12.5px">Viewer</div><div style="color:var(--tx3);font-size:10.5px">ดูได้อย่างเดียว</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="glass sec" id="branchInfo" style="background:linear-gradient(135deg,rgba(255,247,237,.95),rgba(255,237,213,.7))">
+    <div style="font-size:11px;font-weight:700;color:var(--o600);margin-bottom:6px">🏪 สาขาของคุณ</div>
+    <div id="myBranchDisp" style="font-size:13px;font-weight:700;color:var(--tx1)">—</div>
+  </div>
+</aside>
+</div>
+
+<!-- =================== MODALS =================== -->
+
+<!-- LOGIN -->
+<div id="loginM" class="mbk h">
+  <div class="mbox">
+    <button onclick="closeM('loginM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="mhero">🔐</div>
+      <div><div style="font-size:17px;font-weight:800;color:var(--tx1)">เข้าสู่ระบบ</div>
+        <div style="font-size:11px;color:var(--tx3)">กรุณาล็อกอินเพื่อใช้งาน</div></div>
+    </div>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px">
+      <div><label class="lbl">Username</label><input type="text" id="liU" required class="inp" placeholder="กรอก username"></div>
+      <div><label class="lbl">Password</label><input type="password" id="liP" required class="inp" placeholder="กรอก password"></div>
+      <p id="liErr" class="hidden" style="font-size:12px;color:var(--red);background:#fef2f2;padding:8px 12px;border-radius:8px;text-align:center">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+      <button type="submit" class="btn btn-o btn-fw btn-lg">ลงชื่อเข้าใช้</button>
+    </form>
+  </div>
+</div>
+
+<!-- ADD / EDIT ANN -->
+<div id="annM" class="mbk h">
+  <div class="mbox w">
+    <button onclick="closeM('annM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="mhero">📢</div>
+      <div><div id="annMTitle" style="font-size:17px;font-weight:800;color:var(--o600)">สร้างประกาศใหม่</div>
+        <div style="font-size:11px;color:var(--tx3)">ประกาศจะแสดงทุกสาขาที่เลือก</div></div>
+    </div>
+    <form id="annForm" style="display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" id="annEId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl">หมวดหมู่ *</label>
+          <select id="annCat" class="inp" onchange="updateCatPreview()">
+            <option value="urgent">🔴 งานด่วน</option>
+            <option value="general" selected>🟠 ทั่วไป</option>
+            <option value="training">🟣 อบรม/ประชุม</option>
+            <option value="promo">🟢 โปรโมชัน</option>
+            <option value="meeting">🔵 ประชุม</option>
+            <option value="info">🟡 ข้อมูล/แจ้งเพื่อทราบ</option>
+          </select></div>
+        <div><label class="lbl">สถานะ *</label>
+          <select id="annStatus" class="inp">
+            <option value="new">🔵 ใหม่</option>
+            <option value="ongoing">🟡 กำลังดำเนินการ</option>
+            <option value="done">🟢 เสร็จแล้ว</option>
+          </select></div>
+      </div>
+      <div><label class="lbl">หัวข้อประกาศ *</label>
+        <input type="text" id="annTi" required class="inp" placeholder="เช่น งานประจำเดือนมิถุนายน"></div>
+      <div><label class="lbl">รายละเอียด *</label>
+        <textarea id="annCo" required rows="3" class="inp" style="resize:vertical" placeholder="รายละเอียดงานหรือประกาศ..."></textarea></div>
+      <!-- branch target -->
+      <div class="fsec">
+        <label class="lbl">📍 ส่งถึงสาขา</label>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button type="button" onclick="selectAllBranches(true)" class="btn btn-sm btn-ghost">เลือกทั้งหมด</button>
+          <button type="button" onclick="selectAllBranches(false)" class="btn btn-sm btn-ghost">ล้างทั้งหมด</button>
+        </div>
+        <div id="branchCheckList" style="display:flex;flex-wrap:wrap;gap:5px;max-height:100px;overflow-y:auto"></div>
+      </div>
+      <!-- expiry -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl">วันหมดอายุ (ไม่บังคับ)</label>
+          <input type="date" id="annExp" class="inp"></div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <div class="tgl-row">
+            <button type="button" id="pinTgl" class="tgl" onclick="this.classList.toggle('on')"></button>
+            <span style="font-size:12px;color:var(--tx2)">📌 ปักหมุด</span>
+          </div>
+        </div>
+      </div>
+      <!-- link -->
+      <div class="fsec">
+        <div style="font-size:10px;font-weight:700;color:var(--o600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📎 แนบลิงก์เอกสาร</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label class="lbl">URL</label><input type="url" id="annLi" class="inp" placeholder="https://..."></div>
+          <div><label class="lbl">ชื่อปุ่ม</label><input type="text" id="annLn" class="inp" placeholder="เช่น ดูคู่มือ"></div>
+        </div>
+      </div>
+      <!-- file reply option -->
+      <div class="tgl-row fsec" style="gap:10px">
+        <button type="button" id="reqFileTgl" class="tgl" onclick="this.classList.toggle('on')"></button>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--tx1)">📤 ให้พนักงานแนบไฟล์ตอบกลับ</div>
+          <div style="font-size:10.5px;color:var(--tx3)">รองรับ รูปภาพ / PDF / Excel</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="button" onclick="closeM('annM')" class="btn btn-ghost btn-fw" style="border-radius:10px">ยกเลิก</button>
+        <button type="submit" id="annSubBtn" class="btn btn-o btn-fw btn-lg">โพสต์ประกาศ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- VIEW ANN (detail + file reply) -->
+<div id="viewAnnM" class="mbk h">
+  <div class="mbox w">
+    <button onclick="closeM('viewAnnM')" class="mcl">✕</button>
+    <div id="viewAnnContent"></div>
+  </div>
+</div>
+
+<!-- ADD MENU -->
+<div id="addMenuM" class="mbk h">
+  <div class="mbox">
+    <button onclick="closeM('addMenuM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="mhero">📌</div>
+      <div style="font-size:16px;font-weight:800;color:var(--tx1)">เพิ่มเมนูระบบ</div>
+    </div>
+    <form id="menuForm" style="display:flex;flex-direction:column;gap:12px">
+      <div><label class="lbl">ชื่อเมนู</label><input type="text" id="mN" required class="inp" placeholder="เช่น รายงานยอดขาย"></div>
+      <div><label class="lbl">ไอคอน (Emoji)</label><input type="text" id="mI" required class="inp" placeholder="เช่น 📊"></div>
+      <div><label class="lbl">URL</label><input type="url" id="mL" required class="inp" placeholder="https://..."></div>
+      <div style="display:flex;gap:8px">
+        <button type="button" onclick="closeM('addMenuM')" class="btn btn-ghost btn-fw" style="border-radius:10px">ยกเลิก</button>
+        <button type="submit" class="btn btn-o btn-fw btn-lg">บันทึก</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- BRANCH MANAGEMENT -->
+<div id="branchMgmtM" class="mbk h">
+  <div class="mbox">
+    <button onclick="closeM('branchMgmtM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="mhero">🏪</div>
+      <div><div style="font-size:16px;font-weight:800;color:var(--tx1)">จัดการสาขา</div>
+        <div style="font-size:11px;color:var(--tx3)">เพิ่ม / ลบ ชื่อสาขา</div></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <input type="text" id="newBranchInp" class="inp" placeholder="ชื่อสาขาใหม่ เช่น สาขาเชียงใหม่" style="flex:1">
+      <button onclick="addBranch()" class="btn btn-o">เพิ่ม</button>
+    </div>
+    <div id="branchList" style="display:flex;flex-direction:column;gap:4px;max-height:360px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT -->
+<div id="userMgmtM" class="mbk h">
+  <div class="mbox xl">
+    <button onclick="closeM('userMgmtM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:16px">
+      <div class="mhero">👥</div>
+      <div style="flex:1">
+        <div style="font-size:17px;font-weight:800;color:var(--tx1)">จัดการผู้ใช้งาน</div>
+        <div style="font-size:11px;color:var(--tx3)">เพิ่ม แก้ไข กำหนดสิทธิ์และสาขา</div>
+      </div>
+      <button onclick="openEditUser(null)" class="btn btn-o btn-sm">＋ เพิ่มผู้ใช้</button>
+    </div>
+    <div class="urow hd"><div></div><div>ชื่อ / Username</div><div>สิทธิ์</div><div>สาขา</div><div>จัดการ</div></div>
+    <div id="utbody" style="display:flex;flex-direction:column;gap:2px"></div>
+  </div>
+</div>
+
+<!-- EDIT USER -->
+<div id="editUserM" class="mbk h">
+  <div class="mbox">
+    <button onclick="closeM('editUserM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="mhero">✏️</div>
+      <div id="euTi" style="font-size:16px;font-weight:800;color:var(--tx1)">แก้ไขผู้ใช้งาน</div>
+    </div>
+    <form id="editUserForm" style="display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" id="euId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl">ชื่อแสดง *</label><input type="text" id="euN" required class="inp" placeholder="ชื่อ-นามสกุล"></div>
+        <div><label class="lbl">สาขา</label>
+          <select id="euBr" class="inp"></select></div>
+      </div>
+      <div><label class="lbl">Username *</label><input type="text" id="euU" required class="inp" placeholder="ชื่อล็อกอิน"></div>
+      <div><label class="lbl">Password</label>
+        <input type="password" id="euP" class="inp" placeholder="ปล่อยว่างไว้ = คงรหัสเดิม"></div>
+      <div><label class="lbl">สิทธิ์ *</label>
+        <select id="euR" class="inp" onchange="updateRolePreview()">
+          <option value="admin">👑 Admin</option>
+          <option value="user">👤 User</option>
+          <option value="viewer" selected>👁 Viewer</option>
+        </select></div>
+      <div class="fsec" id="rolePreview" style="font-size:12px;color:var(--tx2);line-height:2"></div>
+      <div style="display:flex;gap:8px">
+        <button type="button" onclick="closeM('editUserM')" class="btn btn-ghost btn-fw" style="border-radius:10px">ยกเลิก</button>
+        <button type="submit" class="btn btn-o btn-fw btn-lg">บันทึก</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashM" class="mbk h">
+  <div class="mbox xl">
+    <button onclick="closeM('dashM')" class="mcl">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="mhero">📊</div>
+      <div style="font-size:17px;font-weight:800;color:var(--tx1)">Dashboard สรุป</div>
+    </div>
+    <div id="dashContent"></div>
+  </div>
+</div>
+
+<!-- =================== JS =================== -->
+<script>
+/* ========== DATA ========== */
+const DEF_USERS=[
+  {id:1,username:'admin', pw:'1234',role:'admin', name:'ผู้ดูแลระบบ',branch:'สำนักงานใหญ่'},
+  {id:2,username:'user',  pw:'1234',role:'user',  name:'พนักงาน',   branch:'สาขา 1'},
+  {id:3,username:'viewer',pw:'1234',role:'viewer',name:'ผู้ชม',      branch:'สาขา 2'}
+];
+const DEF_BRANCHES=['สำนักงานใหญ่','สาขา 1','สาขา 2','สาขา 3'];
+const DEF_ANNS=[
+  {id:'s1',title:'ประชาสัมพันธ์ระบบใหม่',content:'ระบบศูนย์ประสานงานได้รับการอัปเกรดใหม่ มีฟีเจอร์เพิ่มเติมมากมาย กรุณาอ่านคู่มือก่อนใช้งาน',cat:'info',status:'new',branches:['ทุกสาขา'],ts:new Date().toISOString(),pinned:true,reqFile:false,link:'',linkName:'',expiry:'',history:[]},
+  {id:'s2',title:'อบรมพนักงานใหม่ ประจำเดือน',content:'กำหนดการอบรม: วันที่ 30 พ.ค. เวลา 09:00-16:00 น. ณ ห้องประชุมใหญ่ กรุณาเตรียมเอกสารมาด้วย',cat:'training',status:'ongoing',branches:['สาขา 1','สาขา 2'],ts:new Date(Date.now()-86400000).toISOString(),pinned:false,reqFile:true,link:'',linkName:'',expiry:'',history:[]},
+  {id:'s3',title:'โปรโมชันพิเศษประจำสัปดาห์',content:'ลด 20% สินค้าทุกหมวด ระหว่างวันที่ 25-31 พ.ค. ใช้ได้ทุกสาขา อย่าลืมอัปเดตราคาในระบบ',cat:'promo',status:'new',branches:['ทุกสาขา'],ts:new Date(Date.now()-172800000).toISOString(),pinned:false,reqFile:false,link:'https://drive.google.com',linkName:'ดูรายละเอียดโปร',expiry:'',history:[]},
+  {id:'s4',title:'งานด่วน: ส่งรายงานยอดขาย',content:'ขอให้ทุกสาขาส่งรายงานยอดขายประจำเดือนภายในวันที่ 31 พ.ค. หากไม่ส่งตามกำหนดจะมีการติดตามเป็นรายบุคคล',cat:'urgent',status:'ongoing',branches:['ทุกสาขา'],ts:new Date(Date.now()-259200000).toISOString(),pinned:true,reqFile:true,link:'',linkName:'',expiry:'2025-05-31',history:[{by:'admin',at:new Date(Date.now()-200000000).toISOString(),action:'สร้างประกาศ'}]}
+];
+
+function ld(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def}}
+function sv(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+let users    = ld('hub_users',DEF_USERS);
+let branches = ld('hub_branches',DEF_BRANCHES);
+let anns     = ld('hub_anns',DEF_ANNS);
+let menus    = ld('hub_menus',[{id:1,name:'หน้าหลัก',icon:'🏠',url:'#'},{id:2,name:'คู่มือการทำงาน',icon:'📁',url:'https://drive.google.com'}]);
+let readIds  = ld('hub_read',[]);
+
+let curUser = null;
+try{curUser=JSON.parse(localStorage.getItem('hub_cur'));}catch{}
+let curRole = curUser?.role || 'viewer';
+
+let sortDesc=true, curCat='all', curStatus='all', curView='grid';
+
+/* ========== MODAL HELPERS ========== */
+window.openM  = id => { document.getElementById(id).classList.remove('h'); };
+window.closeM = id => { document.getElementById(id).classList.add('h'); };
+
+/* ========== DARK MODE ========== */
+window.toggleDark = () => {
+  const d = document.documentElement;
+  const on = d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme', on?'light':'dark');
+  document.getElementById('darkBtn').textContent = on?'🌙':'☀️';
+  localStorage.setItem('hub_dark', on?'0':'1');
+};
+if(ld('hub_dark','0')==='1'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('darkBtn').textContent='☀️';}
+
+/* ========== SORT / VIEW ========== */
+window.toggleSort = () => { sortDesc=!sortDesc; document.getElementById('sortIco').textContent=sortDesc?'↓':'↑'; document.getElementById('sortTxt').textContent=sortDesc?'ล่าสุด':'เก่าสุด'; renderCards(); };
+window.setView = v => {
+  curView=v;
+  document.getElementById('annGrid').className = v+'-view';
+  document.getElementById('gridBtn').style.background = v==='grid'?'rgba(249,115,22,.12)':'';
+  document.getElementById('gridBtn').style.color = v==='grid'?'var(--o600)':'';
+  document.getElementById('listBtn').style.background = v==='list'?'rgba(249,115,22,.12)':'';
+  document.getElementById('listBtn').style.color = v==='list'?'var(--o600)':'';
+};
+setView('grid');
+
+/* ========== AUTH ========== */
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const u=document.getElementById('liU').value.trim(), p=document.getElementById('liP').value;
+  const found=users.find(x=>x.username===u&&x.pw===p);
+  if(found){curUser=found;curRole=found.role;localStorage.setItem('hub_cur',JSON.stringify(found));document.getElementById('liErr').classList.add('h');e.target.reset();closeM('loginM');refreshAll();}
+  else document.getElementById('liErr').classList.remove('h');
+});
+window.logout=()=>{if(!confirm('ออกจากระบบ?'))return;curUser=null;curRole='viewer';localStorage.removeItem('hub_cur');refreshAll();};
+
+/* ========== REFRESH ALL ========== */
+function refreshAll(){
+  const isAdmin=curRole==='admin';
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    if(isAdmin){el.classList.remove('hidden');if(el.classList.contains('sb-bot'))el.style.display='flex';}
+    else{el.classList.add('hidden');}
+  });
+  const pi=document.getElementById('profInfo');
+  const logBtn=`<button onclick="logout()" style="font-size:11px;color:var(--tx3);background:none;border:none;cursor:pointer;padding:0;font-family:'Prompt',sans-serif;margin-top:2px" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--tx3)'">ออกจากระบบ</button>`;
+  if(curRole==='admin') pi.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--o600)">👑 ${curUser?.name||'Admin'}</div><div style="font-size:11px;color:var(--tx3)">${curUser?.branch||''}</div>${logBtn}`;
+  else if(curRole==='user') pi.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--tx1)">👤 ${curUser?.name||'User'}</div><div style="font-size:11px;color:var(--tx3)">${curUser?.branch||''}</div>${logBtn}`;
+  else pi.innerHTML=`<div style="font-size:12px;color:var(--tx3);margin-bottom:8px">สถานะ: ผู้เยี่ยมชม</div><button onclick="openM('loginM')" class="btn btn-o btn-pill btn-sm">เข้าสู่ระบบ</button>`;
+  const bd=document.getElementById('myBranchDisp');
+  if(bd) bd.textContent = curUser?.branch || (curRole==='viewer'?'ผู้เยี่ยมชม':'—');
+  renderMenus(); buildFilterBar(); renderStats(); renderCards();
+}
+
+/* ========== MENUS ========== */
+function renderMenus(){
+  const c=document.getElementById('menuContainer'); c.innerHTML='';
+  menus.forEach(m=>{
+    const isV=curRole==='viewer', href=isV?'#':m.url, oc=isV?'onclick="vaAlert(event)"':'';
+    c.insertAdjacentHTML('beforeend',`<div style="position:relative">
+      <a href="${href}" target="${!isV&&m.url!=='#'?'_blank':'_self'}" ${oc} class="mi ${m.url==='#'?'active':''}">
+        <span class="ico">${m.icon}</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name}</span>
+      </a>
+      ${curRole==='admin'&&m.id>2?`<button onclick="delMenu(${m.id})" class="xbtn">✕</button>`:''}
+    </div>`);
+  });
+}
+window.delMenu=id=>{if(confirm('ลบเมนู?')){menus=menus.filter(m=>m.id!==id);sv('hub_menus',menus);renderMenus();}};
+document.getElementById('menuForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  menus.push({id:Date.now(),name:document.getElementById('mN').value,icon:document.getElementById('mI').value,url:document.getElementById('mL').value});
+  sv('hub_menus',menus);renderMenus();e.target.reset();closeM('addMenuM');
+});
+
+/* ========== VIEWER ALERT ========== */
+window.vaAlert=e=>{e.preventDefault();alert('⚠️ กรุณาเข้าสู่ระบบก่อนใช้งาน');};
+
+/* ========== CAT CONFIG ========== */
+const CATS={
+  all:    {label:'ทั้งหมด', icon:'📋', cls:''},
+  urgent: {label:'งานด่วน',  icon:'🔴', cls:'cat-urgent'},
+  general:{label:'ทั่วไป',   icon:'🟠', cls:'cat-general'},
+  training:{label:'อบรม',    icon:'🟣', cls:'cat-training'},
+  promo:  {label:'โปรโมชัน', icon:'🟢', cls:'cat-promo'},
+  meeting:{label:'ประชุม',   icon:'🔵', cls:'cat-meeting'},
+  info:   {label:'แจ้งทราบ', icon:'🟡', cls:'cat-info'},
+};
+const STATUSES={
+  all:    {label:'ทุกสถานะ'},
+  new:    {label:'ใหม่'},
+  ongoing:{label:'กำลังดำเนินการ'},
+  done:   {label:'เสร็จแล้ว'},
+};
+const ROLE_PERMS={
+  admin:  ['✅ เพิ่ม/ลบ/แก้ไขประกาศ','✅ จัดการเมนู/สาขา/ผู้ใช้','✅ เปิดลิงก์และโหลดไฟล์','✅ ดูประกาศทั้งหมด'],
+  user:   ['❌ ไม่สามารถแก้ไขประกาศ','❌ ไม่สามารถจัดการระบบ','✅ เปิดลิงก์ / โหลดไฟล์ / ส่งไฟล์ตอบกลับ','✅ ดูประกาศทั้งหมด'],
+  viewer: ['❌ ไม่สามารถแก้ไขประกาศ','❌ ไม่สามารถจัดการระบบ','❌ เปิดลิงก์ไม่ได้','✅ ดูประกาศทั้งหมด'],
+};
+
+/* ========== FILTER BAR ========== */
+function buildFilterBar(){
+  const bar=document.getElementById('filterBar'); bar.innerHTML='';
+  // status filter
+  Object.entries(STATUSES).forEach(([k,v])=>{
+    const cnt=k==='all'?getVisibleAnns().length:getVisibleAnns().filter(a=>a.status===k).length;
+    bar.insertAdjacentHTML('beforeend',`<button class="ftab ${curStatus===k?'on':''}" onclick="setStatus('${k}')">
+      ${v.label} <span class="cnt">${cnt}</span></button>`);
+  });
+  bar.insertAdjacentHTML('beforeend','<div style="width:1px;height:20px;background:var(--border2);margin:0 2px"></div>');
+  // cat filter
+  Object.entries(CATS).forEach(([k,v])=>{
+    if(k==='all') return;
+    const cnt=getVisibleAnns().filter(a=>a.cat===k).length;
+    if(cnt===0) return;
+    bar.insertAdjacentHTML('beforeend',`<button class="ftab cat-${k} ${curCat===k?'on':''}" onclick="setCat('${k}')">
+      ${v.icon} ${v.label} <span class="cnt">${cnt}</span></button>`);
+  });
+  if(curCat!=='all'||curStatus!=='all'){
+    bar.insertAdjacentHTML('beforeend',`<button class="ftab" onclick="resetFilters()" style="color:var(--red);border-color:rgba(239,68,68,.2)">✕ ล้างตัวกรอง</button>`);
+  }
+}
+window.setCat=k=>{curCat=k;buildFilterBar();renderCards();};
+window.setStatus=k=>{curStatus=k;buildFilterBar();renderCards();};
+window.resetFilters=()=>{curCat='all';curStatus='all';buildFilterBar();renderCards();};
+
+/* ========== STATS ========== */
+function renderStats(){
+  const all=anns, visible=getVisibleAnns();
+  const unread=all.filter(a=>!readIds.includes(a.id)).length;
+  const urgent=all.filter(a=>a.cat==='urgent'&&a.status!=='done').length;
+  const ongoing=all.filter(a=>a.status==='ongoing').length;
+  const done=all.filter(a=>a.status==='done').length;
+  document.getElementById('statRow').innerHTML=`
+    <div class="stat-box"><div class="sv" style="color:var(--blue)">${unread}</div><div class="sl">ยังไม่อ่าน</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--red)">${urgent}</div><div class="sl">งานด่วน</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--yellow)">${ongoing}</div><div class="sl">กำลังดำเนินการ</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--green)">${done}</div><div class="sl">เสร็จแล้ว</div></div>`;
+}
+
+/* ========== GET VISIBLE ANNS ========== */
+function getVisibleAnns(){
+  const q=(document.getElementById('searchQ')?.value||'').toLowerCase();
+  const myBranch=curUser?.branch||'';
+  return anns.filter(a=>{
+    if(curRole!=='admin'&&myBranch&&!a.branches.includes('ทุกสาขา')&&!a.branches.includes(myBranch)) return false;
+    if(curCat!=='all'&&a.cat!==curCat) return false;
+    if(curStatus!=='all'&&a.status!==curStatus) return false;
+    if(q&&!(a.title||'').toLowerCase().includes(q)&&!(a.content||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+/* ========== RENDER CARDS ========== */
+function renderCards(){
+  const grid=document.getElementById('annGrid'); grid.innerHTML='';
+  let data=getVisibleAnns();
+  document.getElementById('showCount').textContent=data.length;
+  const bl=document.getElementById('branchLabel');
+  bl.textContent=curUser?.branch&&curRole!=='admin'?`• ${curUser.branch}`:'';
+
+  if(!data.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--tx3)">
+      <div style="font-size:36px;margin-bottom:10px">🔍</div>
+      <div style="font-weight:600">ไม่พบประกาศ</div></div>`;
+    buildFilterBar(); return;
+  }
+
+  const pinned=data.filter(a=>a.pinned), rest=data.filter(a=>!a.pinned);
+  rest.sort((a,b)=>sortDesc?new Date(b.ts)-new Date(a.ts):new Date(a.ts)-new Date(b.ts));
+  const sorted=[...pinned,...rest];
+  const isV=curRole==='viewer', isU=curRole==='user', isA=curRole==='admin';
+  const now=new Date();
+
+  sorted.forEach((ann,i)=>{
+    const cat=CATS[ann.cat]||CATS.general;
+    const isExp=ann.expiry&&new Date(ann.expiry)<now;
+    const isUnread=!readIds.includes(ann.id);
+    let ts='เพิ่งโพสต์';
+    try{if(ann.ts){const d=new Date(ann.ts);if(!isNaN(d))ts=d.toLocaleDateString('th-TH');}}catch{}
+
+    const stMap={new:`<span class="sbadge new">🔵 ใหม่</span>`,ongoing:`<span class="sbadge ongoing">🟡 ดำเนินการ</span>`,done:`<span class="sbadge done">🟢 เสร็จ</span>`};
+    const stBadge=stMap[ann.status]||'';
+    const catBadge=`<span class="cbadge cat-${ann.cat}">${cat.icon} ${cat.label}</span>`;
+    const expBadge=isExp?`<span class="sbadge expired">⏰ หมดอายุ</span>`:'';
+    const branchesHtml=ann.branches.map(b=>`<span class="bchip">${b}</span>`).join('');
+
+    const linkHtml=ann.link?`<a href="${isV?'#':ann.link}" target="${!isV?'_blank':'_self'}" ${isV?'onclick="vaAlert(event)"':''} class="lbtn cat-${ann.cat}${isV?' dis':''}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>${ann.linkName||'เปิดเอกสาร'}</span>
+      <svg style="margin-left:auto;opacity:.65" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>`:'';
+
+    const reqFileHtml=ann.reqFile&&!isV?`<button onclick="openViewAnn('${ann.id}')" class="lbtn cat-${ann.cat}" style="justify-content:center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>📤 แนบไฟล์ตอบกลับ</span></button>`:'';
+
+    const adminActs=isA?`<div class="card-acts">
+      <button class="ca pin" onclick="togglePin('${ann.id}')" title="${ann.pinned?'ถอดหมุด':'ปักหมุด'}">${ann.pinned?'📌 ถอดหมุด':'📌 ปักหมุด'}</button>
+      <button class="ca edit" onclick="openEditAnn('${ann.id}')">✏️ แก้ไข</button>
+      <button class="ca del" onclick="delAnn('${ann.id}')">🗑 ลบ</button>
+    </div>`:'';
+
+    if(curView==='grid'){
+      grid.insertAdjacentHTML('beforeend',`
+        <div class="ann-card cat-${ann.cat} ${ann.pinned?'pinned':''} ${isExp?'expired':''}" style="animation-delay:${i*.04}s" onclick="markRead('${ann.id}')">
+          ${ann.pinned?`<div class="pin-badge">📌 ปักหมุด</div>`:''}
+          ${isUnread?`<div style="position:absolute;top:10px;left:${ann.pinned?'auto':8}px;${ann.pinned?'display:none':''}"><div class="unread-dot"></div></div>`:''}
+          <div class="cat-bar"></div>
+          <div class="body">
+            <div class="ann-meta">${catBadge}${stBadge}${expBadge}</div>
+            <div class="ann-date"><div class="dot"></div>${ts}</div>
+            <h3 class="ann-title">${ann.title}</h3>
+            <p class="ann-txt">${ann.content}</p>
+            ${linkHtml||reqFileHtml||adminActs?`<div class="ann-foot">${linkHtml}${reqFileHtml}${adminActs}</div>`:''}
+          </div>
+        </div>`);
+    } else {
+      grid.insertAdjacentHTML('beforeend',`
+        <div class="ann-card cat-${ann.cat} ${ann.pinned?'pinned':''} ${isExp?'expired':''}" style="animation-delay:${i*.03}s;position:relative" onclick="markRead('${ann.id}')">
+          <div class="cat-bar"></div>
+          <div class="body">
+            <div class="body-left">
+              <div class="ann-meta" style="margin-bottom:4px">${catBadge}${stBadge}${expBadge}${isUnread?`<div class="unread-dot"></div>`:''}</div>
+              <h3 class="ann-title">${ann.title}</h3>
+              <p class="ann-txt" style="margin-top:3px">${ann.content}</p>
+            </div>
+            <div class="body-right">
+              <div class="ann-date" style="flex-direction:column;align-items:flex-end;gap:3px">
+                <span style="color:var(--tx3);font-size:10px">${ts}</span>
+                ${branchesHtml}
+              </div>
+              ${linkHtml}${reqFileHtml}
+              ${adminActs}
+            </div>
+          </div>
+        </div>`);
+    }
+  });
+  buildFilterBar();
+}
+
+/* ========== MARK READ ========== */
+window.markRead=id=>{if(!readIds.includes(id)){readIds.push(id);sv('hub_read',readIds);renderStats();}};
+
+/* ========== VIEW ANN (file reply) ========== */
+window.openViewAnn=id=>{
+  const ann=anns.find(a=>a.id===id); if(!ann) return;
+  markRead(id);
+  const replies=ld('hub_replies_'+id,[]);
+  const rHtml=replies.length?replies.map(r=>`<div class="file-chip">
+    <span>📎</span><span>${r.name}</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--tx3)">${r.by} · ${new Date(r.at).toLocaleDateString('th-TH')}</span>
+  </div>`).join(''):`<div style="font-size:12px;color:var(--tx3);text-align:center;padding:10px">ยังไม่มีไฟล์ตอบกลับ</div>`;
+  document.getElementById('viewAnnContent').innerHTML=`
+    <div style="margin-bottom:16px">
+      <span class="cbadge cat-${ann.cat}">${CATS[ann.cat]?.icon} ${CATS[ann.cat]?.label}</span>
+      <h3 style="font-size:16px;font-weight:800;color:var(--tx1);margin-top:8px">${ann.title}</h3>
+      <p style="font-size:13px;color:var(--tx2);margin-top:6px;line-height:1.7">${ann.content}</p>
+    </div>
+    ${ann.reqFile&&curRole!=='viewer'?`
+    <div class="fsec" style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--o600);margin-bottom:10px">📤 แนบไฟล์ตอบกลับ (รูป / PDF / Excel)</div>
+      <div class="upload-zone" onclick="document.getElementById('fileInp_${id}').click()" id="dropZone_${id}">
+        <input type="file" id="fileInp_${id}" multiple accept="image/*,.pdf,.xlsx,.xls,.csv" onchange="handleFiles('${id}',this.files)">
+        <div style="font-size:24px;margin-bottom:6px">📁</div>
+        <div style="font-size:13px;font-weight:600;color:var(--o500)">คลิกหรือลากไฟล์มาวางที่นี่</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:4px">รองรับ JPG, PNG, PDF, Excel</div>
+      </div>
+      <div id="fileList_${id}" style="margin-top:8px;display:flex;flex-direction:column;gap:4px"></div>
+      <button onclick="submitFiles('${id}')" class="btn btn-o btn-fw" style="border-radius:10px;margin-top:10px">ส่งไฟล์</button>
+    </div>`:''} 
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">ไฟล์ที่ส่งมาแล้ว (${replies.length} ไฟล์)</div>
+      ${rHtml}
+    </div>`;
+  openM('viewAnnM');
+  // drag drop
+  const dz=document.getElementById('dropZone_'+id);
+  if(dz){dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFiles(id,e.dataTransfer.files);});}
+};
+
+let pendingFiles={};
+window.handleFiles=(id,files)=>{
+  if(!pendingFiles[id]) pendingFiles[id]=[];
+  Array.from(files).forEach(f=>pendingFiles[id].push(f));
+  const fl=document.getElementById('fileList_'+id); if(!fl) return;
+  fl.innerHTML='';
+  (pendingFiles[id]||[]).forEach((f,i)=>{fl.insertAdjacentHTML('beforeend',`<div class="file-chip">
+    <span>${f.name.endsWith('.pdf')?'📄':f.name.match(/xls/)?'📊':'🖼'}</span>
+    <span>${f.name}</span><span style="color:var(--tx3);font-size:10px;margin-left:4px">${(f.size/1024).toFixed(1)}KB</span>
+    <button class="rem" onclick="removeFile('${id}',${i})">✕</button></div>`);});
+};
+window.removeFile=(id,i)=>{if(pendingFiles[id])pendingFiles[id].splice(i,1);window.handleFiles(id,[]);};
+window.submitFiles=id=>{
+  const fs=pendingFiles[id]||[];
+  if(!fs.length){alert('กรุณาเลือกไฟล์ก่อน');return;}
+  const replies=ld('hub_replies_'+id,[]);
+  fs.forEach(f=>replies.push({name:f.name,by:curUser?.name||'ไม่ทราบ',at:new Date().toISOString(),size:f.size}));
+  sv('hub_replies_'+id,replies);
+  pendingFiles[id]=[];
+  alert(`✅ ส่งไฟล์ ${fs.length} ไฟล์เรียบร้อย`);
+  openViewAnn(id);
+};
+
+/* ========== ANN CRUD ========== */
+function buildBranchCheckList(){
+  const c=document.getElementById('branchCheckList'); c.innerHTML='';
+  branches.forEach(b=>{
+    c.insertAdjacentHTML('beforeend',`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;background:var(--o50);border:1px solid rgba(249,115,22,.18);padding:4px 10px;border-radius:50px">
+      <input type="checkbox" name="branchCk" value="${b}" style="accent-color:var(--o500)"> ${b}</label>`);
+  });
+  // add "ทุกสาขา"
+  c.insertAdjacentHTML('afterbegin',`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(234,88,12,.07));border:1px solid rgba(249,115,22,.3);padding:4px 12px;border-radius:50px;font-weight:700;color:var(--o600)">
+    <input type="checkbox" name="branchCk" value="ทุกสาขา" style="accent-color:var(--o500)"> 🏬 ทุกสาขา</label>`);
+}
+window.selectAllBranches=sel=>{document.querySelectorAll('[name="branchCk"]').forEach(c=>c.checked=sel);};
+window.updateCatPreview=()=>{};
+
+window.openAddAnn=()=>{
+  document.getElementById('annEId').value='';
+  document.getElementById('annMTitle').textContent='สร้างประกาศใหม่';
+  document.getElementById('annSubBtn').textContent='โพสต์ประกาศ';
+  document.getElementById('annForm').reset();
+  document.getElementById('pinTgl').classList.remove('on');
+  document.getElementById('reqFileTgl').classList.remove('on');
+  buildBranchCheckList();
+  openM('annM');
+};
+window.openEditAnn=id=>{
+  const ann=anns.find(a=>a.id===id); if(!ann) return;
+  document.getElementById('annEId').value=id;
+  document.getElementById('annMTitle').textContent='แก้ไขประกาศ';
+  document.getElementById('annSubBtn').textContent='บันทึกการแก้ไข';
+  document.getElementById('annTi').value=ann.title||'';
+  document.getElementById('annCo').value=ann.content||'';
+  document.getElementById('annCat').value=ann.cat||'general';
+  document.getElementById('annStatus').value=ann.status||'new';
+  document.getElementById('annLi').value=ann.link||'';
+  document.getElementById('annLn').value=ann.linkName||'';
+  document.getElementById('annExp').value=ann.expiry||'';
+  if(ann.pinned) document.getElementById('pinTgl').classList.add('on');
+  else document.getElementById('pinTgl').classList.remove('on');
+  if(ann.reqFile) document.getElementById('reqFileTgl').classList.add('on');
+  else document.getElementById('reqFileTgl').classList.remove('on');
+  buildBranchCheckList();
+  document.querySelectorAll('[name="branchCk"]').forEach(c=>{if(ann.branches.includes(c.value))c.checked=true;});
+  openM('annM');
+};
+window.togglePin=id=>{
+  const idx=anns.findIndex(a=>a.id===id); if(idx<0) return;
+  anns[idx].pinned=!anns[idx].pinned;
+  sv('hub_anns',anns); renderCards();
+};
+window.delAnn=id=>{
+  if(!confirm('ลบประกาศนี้?')) return;
+  anns=anns.filter(a=>a.id!==id); sv('hub_anns',anns); renderCards(); buildFilterBar(); renderStats();
+};
+
+document.getElementById('annForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const btn=document.getElementById('annSubBtn');
+  btn.innerHTML='⏳...'; btn.disabled=true;
+  const eid=document.getElementById('annEId').value;
+  const checked=Array.from(document.querySelectorAll('[name="branchCk"]:checked')).map(c=>c.value);
+  const obj={
+    title:document.getElementById('annTi').value,
+    content:document.getElementById('annCo').value,
+    cat:document.getElementById('annCat').value,
+    status:document.getElementById('annStatus').value,
+    link:document.getElementById('annLi').value,
+    linkName:document.getElementById('annLn').value||'เปิดเอกสาร',
+    expiry:document.getElementById('annExp').value,
+    pinned:document.getElementById('pinTgl').classList.contains('on'),
+    reqFile:document.getElementById('reqFileTgl').classList.contains('on'),
+    branches:checked.length?checked:['ทุกสาขา'],
+  };
+  if(eid){
+    const idx=anns.findIndex(a=>a.id===eid);
+    if(idx>=0){
+      const old=anns[idx];
+      if(!old.history) old.history=[];
+      old.history.push({by:curUser?.name||'admin',at:new Date().toISOString(),action:'แก้ไขประกาศ'});
+      Object.assign(anns[idx],obj);
+    }
+  } else {
+    anns.unshift({id:'a'+Date.now(),...obj,ts:new Date().toISOString(),history:[{by:curUser?.name||'admin',at:new Date().toISOString(),action:'สร้างประกาศ'}]});
+  }
+  sv('hub_anns',anns);
+  btn.innerHTML=eid?'บันทึกการแก้ไข':'โพสต์ประกาศ'; btn.disabled=false;
+  closeM('annM'); renderCards(); buildFilterBar(); renderStats();
+});
+
+/* ========== BRANCHES ========== */
+function renderBranchList(){
+  const c=document.getElementById('branchList'); c.innerHTML='';
+  branches.forEach((b,i)=>{
+    c.insertAdjacentHTML('beforeend',`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2)">
+      <span style="font-size:13px">🏪</span>
+      <span style="flex:1;font-size:13px;font-weight:600">${b}</span>
+      ${i>1?`<button onclick="delBranch(${i})" class="btn btn-sm btn-red" style="border-radius:8px">ลบ</button>`:'<span style="font-size:10px;color:var(--tx3)">ค่าเริ่มต้น</span>'}
+    </div>`);
+  });
+}
+window.addBranch=()=>{
+  const v=document.getElementById('newBranchInp').value.trim();
+  if(!v) return;
+  if(branches.includes(v)){alert('ชื่อสาขานี้มีอยู่แล้ว');return;}
+  branches.push(v); sv('hub_branches',branches);
+  document.getElementById('newBranchInp').value='';
+  renderBranchList();
+};
+window.delBranch=i=>{if(!confirm('ลบสาขา?'))return;branches.splice(i,1);sv('hub_branches',branches);renderBranchList();};
+document.getElementById('branchMgmtM').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('branchMgmtM');});
+document.getElementById('branchMgmtM').querySelector('.mcl').addEventListener('click',()=>{closeM('branchMgmtM');});
+// open branch modal hook
+const origOpenM=window.openM;
+window.openM=id=>{origOpenM(id);if(id==='branchMgmtM')renderBranchList();if(id==='userMgmtM')renderUserTable();if(id==='dashM')renderDash();};
+
+/* ========== USERS ========== */
+window.updateRolePreview=()=>{
+  const r=document.getElementById('euR').value;
+  document.getElementById('rolePreview').innerHTML=(ROLE_PERMS[r]||[]).join('<br>');
+};
+function populateBranchSelect(){
+  const sel=document.getElementById('euBr'); sel.innerHTML='';
+  branches.forEach(b=>sel.insertAdjacentHTML('beforeend',`<option value="${b}">${b}</option>`));
+}
+function renderUserTable(){
+  const tb=document.getElementById('utbody'); tb.innerHTML='';
+  users.forEach(u=>{
+    const isSelf=curUser?.id===u.id;
+    const rb=u.role==='admin'?`<span class="rb admin">👑 Admin</span>`:u.role==='user'?`<span class="rb user">👤 User</span>`:`<span class="rb viewer">👁 Viewer</span>`;
+    tb.insertAdjacentHTML('beforeend',`<div class="urow">
+      <div class="uav ${u.role}">${(u.name||'?')[0].toUpperCase()}</div>
+      <div><div style="font-weight:600;font-size:13px">${u.name} ${isSelf?'<span style="font-size:10px;color:var(--o500)">(คุณ)</span>':''}</div>
+        <div style="font-size:10.5px;color:var(--tx3)">@${u.username} · ${u.branch||'—'}</div></div>
+      <div>${rb}</div>
+      <div style="font-size:11px;color:var(--tx2)">${u.branch||'—'}</div>
+      <div style="display:flex;gap:4px">
+        <button class="ua e" onclick="openEditUser(${u.id})">✏️</button>
+        ${!isSelf?`<button class="ua d" onclick="delUser(${u.id})">🗑</button>`:'<div style="width:26px"></div>'}
+      </div>
+    </div>`);
+  });
+}
+window.openEditUser=id=>{
+  const u=id?users.find(x=>x.id===id):null;
+  document.getElementById('euId').value=u?u.id:'';
+  document.getElementById('euN').value=u?u.name:'';
+  document.getElementById('euU').value=u?u.username:'';
+  document.getElementById('euP').value='';
+  populateBranchSelect();
+  document.getElementById('euBr').value=u?u.branch:branches[0];
+  document.getElementById('euR').value=u?u.role:'viewer';
+  document.getElementById('euTi').textContent=u?'แก้ไขผู้ใช้งาน':'เพิ่มผู้ใช้งานใหม่';
+  updateRolePreview();
+  openM('editUserM');
+};
+document.getElementById('editUserForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=parseInt(document.getElementById('euId').value)||null;
+  const n=document.getElementById('euN').value.trim(), un=document.getElementById('euU').value.trim();
+  const pw=document.getElementById('euP').value, br=document.getElementById('euBr').value, ro=document.getElementById('euR').value;
+  if(!n||!un) return;
+  if(users.find(x=>x.username===un&&x.id!==id)){alert('ชื่อผู้ใช้นี้มีอยู่แล้ว');return;}
+  if(id){const idx=users.findIndex(x=>x.id===id);if(idx>=0){Object.assign(users[idx],{name:n,username:un,branch:br,role:ro});if(pw)users[idx].pw=pw;if(curUser?.id===id){curUser={...users[idx]};curRole=curUser.role;localStorage.setItem('hub_cur',JSON.stringify(curUser));}}}
+  else users.push({id:Date.now(),username:un,pw:pw||'1234',role:ro,name:n,branch:br});
+  sv('hub_users',users); closeM('editUserM'); renderUserTable(); refreshAll();
+});
+window.delUser=id=>{if(!confirm('ลบผู้ใช้?'))return;users=users.filter(x=>x.id!==id);sv('hub_users',users);renderUserTable();};
+
+/* ========== DASHBOARD ========== */
+function renderDash(){
+  const dc=document.getElementById('dashContent');
+  const total=anns.length, done=anns.filter(a=>a.status==='done').length;
+  const ongoing=anns.filter(a=>a.status==='ongoing').length, urgent=anns.filter(a=>a.cat==='urgent').length;
+  // by cat
+  const byCat=Object.entries(CATS).filter(([k])=>k!=='all').map(([k,v])=>({label:v.icon+' '+v.label,cnt:anns.filter(a=>a.cat===k).length})).filter(x=>x.cnt>0).sort((a,b)=>b.cnt-a.cnt);
+  const maxCat=Math.max(...byCat.map(x=>x.cnt),1);
+  // by status
+  const byStatus=[{label:'🔵 ใหม่',cnt:anns.filter(a=>a.status==='new').length},{label:'🟡 ดำเนินการ',cnt:ongoing},{label:'🟢 เสร็จ',cnt:done}];
+  // by branch
+  const branchCnts=branches.map(b=>({label:b,cnt:anns.filter(a=>a.branches.includes('ทุกสาขา')||a.branches.includes(b)).length})).sort((a,b)=>b.cnt-a.cnt).slice(0,8);
+  const maxBr=Math.max(...branchCnts.map(x=>x.cnt),1);
+
+  dc.innerHTML=`
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+    <div class="stat-box"><div class="sv">${total}</div><div class="sl">ทั้งหมด</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--red)">${urgent}</div><div class="sl">งานด่วน</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--yellow)">${ongoing}</div><div class="sl">ดำเนินการ</div></div>
+    <div class="stat-box"><div class="sv" style="color:var(--green)">${done}</div><div class="sl">เสร็จแล้ว</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px">📊 ประกาศตามหมวดหมู่</div>
+      <div class="chart-bar-wrap">${byCat.map(x=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-lbl">${x.label}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(x.cnt/maxCat*100).toFixed(1)}%"></div></div>
+          <div class="chart-bar-val">${x.cnt}</div>
+        </div>`).join('')}</div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px">🏪 ประกาศตามสาขา (Top 8)</div>
+      <div class="chart-bar-wrap">${branchCnts.map(x=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-lbl">${x.label}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(x.cnt/maxBr*100).toFixed(1)}%;background:linear-gradient(90deg,#fb923c,#ea580c)"></div></div>
+          <div class="chart-bar-val">${x.cnt}</div>
+        </div>`).join('')}</div>
+    </div>
+  </div>
+  <div style="margin-top:16px">
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px">📋 สถานะงาน</div>
+    <div style="display:flex;gap:8px">${byStatus.map(x=>`
+      <div class="stat-box" style="flex:1"><div class="sv" style="font-size:18px">${x.cnt}</div><div class="sl">${x.label}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ========== EXPORT CSV ========== */
+window.exportCSV=()=>{
+  const rows=[['ID','หัวข้อ','หมวดหมู่','สถานะ','สาขา','วันที่','วันหมดอายุ','ปักหมุด']];
+  anns.forEach(a=>rows.push([a.id,a.title,CATS[a.cat]?.label||a.cat,a.status,a.branches.join('/'),a.ts,a.expiry||'',a.pinned?'ใช่':'ไม่']));
+  const csv=rows.map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download='announcements_'+new Date().toLocaleDateString('th-TH').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
+};
+
+/* ========== INIT ========== */
+refreshAll();
+</script>
+</body>
+</html>
