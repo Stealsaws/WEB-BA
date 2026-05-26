@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ศูนย์ประสานงานสาขา</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange-50: #fff7ed;
+            --orange-100: #ffedd5;
+            --orange-200: #fed7aa;
+            --orange-400: #fb923c;
+            --orange-500: #f97316;
+            --orange-600: #ea580c;
+            --orange-700: #c2410c;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #fdf0e8;
+            background-image:
+                radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.28) 0%, transparent 45%),
+                radial-gradient(ellipse at 100% 0%, rgba(234,88,12,0.14) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.10) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(203,213,225,0.25) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--gray-700);
+            min-height: 100vh;
+        }
+
+        /* ---- Floating orbs background ---- */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(circle 300px at 10% 20%, rgba(251,146,60,0.13) 0%, transparent 70%),
+                radial-gradient(circle 200px at 90% 80%, rgba(234,88,12,0.10) 0%, transparent 70%),
+                radial-gradient(circle 180px at 70% 10%, rgba(253,186,116,0.15) 0%, transparent 70%);
+        }
+        #app { position: relative; z-index: 1; }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.35); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(249,115,22,0.5); }
+
+        /* ---- Glass surfaces ---- */
+        .glass {
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(24px) saturate(1.6);
+            -webkit-backdrop-filter: blur(24px) saturate(1.6);
+            border: 1px solid rgba(255,255,255,0.75);
+            box-shadow:
+                0 4px 24px -6px rgba(71,85,105,0.13),
+                0 1px 4px rgba(71,85,105,0.07),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .glass-deep {
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(30px) saturate(1.8);
+            -webkit-backdrop-filter: blur(30px) saturate(1.8);
+            border: 1px solid rgba(255,255,255,0.85);
+            box-shadow: 0 20px 60px -15px rgba(30,41,59,0.2), 0 4px 16px -4px rgba(234,88,12,0.08);
+        }
+
+        /* ---- Sidebar ---- */
+        #sidebar {
+            width: 230px;
+            min-width: 230px;
+            position: sticky;
+            top: 16px;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+            padding: 20px 18px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: -20px; right: -20px;
+            width: 90px; height: 90px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 50%;
+        }
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; left: 10px;
+            width: 70px; height: 70px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .sidebar-logo {
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.35);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 12px;
+        }
+
+        .menu-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            padding: 8px 8px 4px;
+        }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 10px;
+            border-radius: 12px;
+            font-size: 13px; font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid transparent;
+            text-decoration: none;
+            margin-bottom: 2px;
+        }
+        .menu-item:hover {
+            background: rgba(249,115,22,0.08);
+            color: var(--orange-600);
+            border-color: rgba(249,115,22,0.15);
+        }
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(249,115,22,0.12), rgba(234,88,12,0.08));
+            color: var(--orange-600);
+            border-color: rgba(249,115,22,0.2);
+            font-weight: 600;
+        }
+        .menu-item .icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+        .menu-item .delete-btn {
+            display: none; position: absolute; right: 8px;
+            background: rgba(239,68,68,0.1); color: #ef4444;
+            border: none; border-radius: 6px;
+            width: 22px; height: 22px;
+            font-size: 11px; cursor: pointer;
+            align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .menu-item:hover .delete-btn { display: flex; }
+        .menu-item .delete-btn:hover { background: #ef4444; color: white; }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid rgba(203,213,225,0.5);
+        }
+
+        /* ---- Header bar ---- */
+        #topbar {
+            border-radius: 18px;
+            padding: 12px 18px;
+        }
+
+        /* ---- Inputs ---- */
+        .field {
+            width: 100%;
+            background: rgba(248,250,252,0.8);
+            border: 1.5px solid rgba(203,213,225,0.7);
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-family: 'Prompt', sans-serif;
+            color: var(--gray-700);
+            transition: all 0.25s ease;
+            outline: none;
+        }
+        .field:focus {
+            background: #fff;
+            border-color: var(--orange-500);
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+        }
+        .field::placeholder { color: var(--gray-400); }
+
+        .search-wrap { position: relative; }
+        .search-wrap input { padding-left: 38px; border-radius: 50px; }
+        .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 15px; pointer-events: none; }
+
+        /* ---- Buttons ---- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px 18px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; font-family: 'Prompt', sans-serif;
+            border: none; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            box-shadow: 0 4px 14px -3px rgba(234,88,12,0.4);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 7px 20px -4px rgba(234,88,12,0.5); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.7);
+            border: 1.5px solid rgba(203,213,225,0.6);
+            color: var(--gray-600);
+        }
+        .btn-ghost:hover { background: white; border-color: var(--orange-300); color: var(--orange-600); }
+
+        .btn-pill { border-radius: 50px; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-full { width: 100%; }
+        .btn-lg { padding: 12px 24px; font-size: 14px; border-radius: 12px; }
+        .btn-add-menu {
+            width: 100%;
+            background: transparent;
+            border: 1.5px dashed rgba(203,213,225,0.8);
+            color: var(--gray-400);
+            border-radius: 12px;
+            padding: 9px;
+            font-size: 12px; font-weight: 500; font-family: 'Prompt', sans-serif;
+            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-add-menu:hover { background: rgba(249,115,22,0.05); border-color: var(--orange-400); color: var(--orange-500); }
+
+        /* ---- Announcement Cards ---- */
+        .ann-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,247,237,0.85) 100%);
+            border: 1px solid rgba(255,255,255,0.9);
+            border-radius: 18px;
+            padding: 0;
+            display: flex; flex-direction: column;
+            height: 200px;
+            position: relative; overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1), box-shadow 0.3s ease;
+            box-shadow:
+                0 2px 8px -2px rgba(71,85,105,0.12),
+                0 8px 24px -8px rgba(234,88,12,0.08),
+                inset 0 1px 0 rgba(255,255,255,1);
+            cursor: default;
+        }
+        /* Shine sweep on hover */
+        .ann-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
+            transform: translateX(-120%);
+            transition: transform 0.55s ease;
+            z-index: 2; pointer-events: none; border-radius: 18px;
+        }
+        .ann-card:hover::before { transform: translateX(120%); }
+        /* Top highlight line */
+        .ann-card::after {
+            content: '';
+            position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            z-index: 3;
+        }
+        .ann-card:hover {
+            transform: translateY(-5px) scale(1.015);
+            box-shadow:
+                0 16px 40px -8px rgba(234,88,12,0.22),
+                0 6px 20px -4px rgba(71,85,105,0.15),
+                inset 0 1px 0 rgba(255,255,255,1);
+        }
+        .ann-card-accent {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+            background: linear-gradient(180deg, #fb923c 0%, #ea580c 60%, #c2410c 100%);
+            border-radius: 18px 0 0 18px;
+            box-shadow: 2px 0 8px rgba(234,88,12,0.3);
+        }
+        /* Subtle orange glow top-right corner */
+        .ann-card-glow {
+            position: absolute; top: -15px; right: -15px;
+            width: 70px; height: 70px;
+            background: radial-gradient(circle, rgba(251,146,60,0.18) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .ann-card-inner { padding: 14px 14px 14px 19px; display: flex; flex-direction: column; height: 100%; position: relative; z-index: 1; }
+        .ann-date {
+            font-size: 10px; font-weight: 600; margin-bottom: 7px;
+            color: var(--orange-500);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .ann-date-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--orange-400);
+            box-shadow: 0 0 4px rgba(249,115,22,0.6);
+            flex-shrink: 0;
+        }
+        .ann-title { font-size: 13px; font-weight: 700; color: var(--gray-800); line-height: 1.4; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s; }
+        .ann-card:hover .ann-title { color: var(--orange-600); }
+        .ann-body { font-size: 11px; color: var(--gray-500); line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; white-space: pre-wrap; }
+        .ann-link-wrap { margin-top: auto; padding-top: 9px; border-top: 1px solid rgba(251,146,60,0.15); }
+
+        /* ---- Beautiful link button with SVG icon ---- */
+        .ann-link {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 7px 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+            background: linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(234,88,12,0.06) 100%);
+            color: var(--orange-600);
+            border: 1.5px solid rgba(249,115,22,0.25);
+            text-decoration: none; transition: all 0.25s ease; width: 100%;
+            position: relative; overflow: hidden;
+        }
+        .ann-link::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            opacity: 0; transition: opacity 0.25s ease;
+            border-radius: 10px;
+        }
+        .ann-link:hover::before { opacity: 1; }
+        .ann-link:hover { color: white; border-color: transparent; box-shadow: 0 4px 14px -3px rgba(234,88,12,0.45); transform: translateY(-1px); }
+        .ann-link span, .ann-link svg { position: relative; z-index: 1; }
+        .ann-link .link-icon {
+            width: 16px; height: 16px; flex-shrink: 0;
+            transition: transform 0.25s ease;
+        }
+        .ann-link:hover .link-icon { transform: translateX(2px); }
+        .ann-link.disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.7); }
+        .ann-link.disabled:hover { transform: none; box-shadow: none; }
+
+        /* ---- Profile card ---- */
+        .profile-avatar {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+            border-radius: 50%; border: 2px solid rgba(255,255,255,0.9);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.2);
+        }
+
+        /* ---- Stat pills ---- */
+        .stat-pill {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            border: 1px solid rgba(251,146,60,0.3);
+            border-radius: 50px; padding: 4px 14px;
+            font-size: 13px; font-weight: 700; color: var(--orange-600);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+
+        /* ---- Role info card ---- */
+        .role-row {
+            display: flex; align-items: flex-start; gap: 8px;
+            padding: 7px 10px; border-radius: 8px;
+            font-size: 12px; color: var(--gray-600);
+            transition: background 0.2s;
+        }
+        .role-row:hover { background: rgba(249,115,22,0.04); }
+        .role-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; margin-top: 1px; }
+        .role-dot.admin { background: linear-gradient(135deg, #fb923c, #ea580c); color: white; }
+        .role-dot.user { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+        .role-dot.viewer { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: var(--gray-500); }
+
+        /* ---- Modals ---- */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 50;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .modal-backdrop.hidden { display: none; }
+        .modal-box {
+            background: rgba(255,255,255,0.97);
+            border: 1px solid rgba(255,255,255,0.9);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 30px 80px -20px rgba(15,23,42,0.35);
+            position: relative;
+            animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .modal-box.wide { max-width: 520px; max-height: 90vh; overflow-y: auto; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.93) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--gray-100); border: none; cursor: pointer;
+            color: var(--gray-500); font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: var(--gray-200); color: var(--gray-800); }
+        .modal-icon {
+            width: 52px; height: 52px; border-radius: 16px; margin: 0 auto 14px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+        .modal-icon.orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+        label.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+        .form-section { background: rgba(248,250,252,0.7); border-radius: 14px; padding: 14px; border: 1px solid rgba(226,232,240,0.6); }
+
+        /* ---- Page layout ---- */
+        #app { display: flex; gap: 16px; padding: 16px; max-width: 1600px; margin: 0 auto; }
+        #main-col { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+        #right-col { width: 260px; min-width: 260px; display: flex; flex-direction: column; gap: 14px; }
+
+        .section-card { border-radius: 18px; padding: 18px 20px; }
+
+        /* ---- Page title area ---- */
+        .page-title {
+            font-size: 21px; font-weight: 800; color: var(--gray-800);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-title-icon {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: linear-gradient(135deg, #fb923c, #ea580c);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(234,88,12,0.35);
+            flex-shrink: 0;
+        }
+        .page-sub { font-size: 13px; color: var(--gray-500); margin-top: 4px; padding-left: 48px; }
+
+        /* ---- Badge ---- */
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .badge-orange {
+            background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,88,12,0.10));
+            color: var(--orange-600);
+            border: 1px solid rgba(249,115,22,0.25);
+            box-shadow: 0 2px 8px -2px rgba(234,88,12,0.2);
+        }
+        .badge-gray { background: var(--gray-100); color: var(--gray-500); border: 1px solid var(--gray-200); }
+
+        /* ---- Card entrance animation ---- */
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(14px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .ann-card { animation: cardIn 0.35s cubic-bezier(0.34,1.2,0.64,1) both; }
+
+        .disabled-link { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 1100px) {
+            #right-col { display: none; }
+        }
+        @media (max-width: 768px) {
+            #app { flex-direction: column; padding: 10px; gap: 10px; }
+            #sidebar { width: 100%; min-width: unset; height: auto; position: relative; top: 0; }
+            .sidebar-body nav { display: flex; flex-direction: row; overflow-x: auto; gap: 4px; }
+            .sidebar-body .menu-section-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="glass">
+
+        <div class="sidebar-header">
+            <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                <div class="sidebar-logo">🏢</div>
+                <div>
+                    <div style="font-size:15px;font-weight:800;color:white;line-height:1.2;">ศูนย์ประสานงาน</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">Branch Coordination Hub</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-body">
+            <div class="menu-section-label">เมนูหลัก</div>
+            <nav id="dynamicMenuContainer"></nav>
+
+            <button onclick="toggleModal('menuModal')" class="btn-add-menu admin-only mt-3 hidden">
+                <span>＋</span> เพิ่มเมนู
+            </button>
+        </div>
+
+        <div class="sidebar-footer admin-only hidden">
+            <button onclick="toggleModal('announceModal')" class="btn btn-primary btn-full">
+                <span>＋</span> เพิ่มประกาศใหม่
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main id="main-col">
+
+        <!-- Topbar -->
+        <div id="topbar" class="glass" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+            <div class="search-wrap" style="flex:1;min-width:200px;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="ค้นหาประกาศ หรือ หัวข้องาน..." class="field" onkeyup="filterAnnouncements()" style="padding-left:38px;border-radius:50px;">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button onclick="toggleSort()" class="btn btn-ghost btn-pill">
+                    <span id="sortIcon">🔽</span>
+                    <span id="sortText">ล่าสุด</span>
+                </button>
+                <button onclick="toggleModal('announceModal')" class="btn btn-primary btn-pill admin-only hidden">
+                    ＋ เพิ่มประกาศ
+                </button>
+            </div>
+        </div>
+
+        <!-- Section title -->
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:0 4px;">
+            <div>
+                <h2 class="page-title">
+                    <div class="page-title-icon">📋</div>
+                    ศูนย์รวมประกาศและงาน
+                </h2>
+                <p class="page-sub">งานทั้งหมดวันนี้: <span id="totalTasksCount" style="font-weight:800;color:var(--orange-500);">0</span> รายการ</p>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <span class="badge badge-orange">🏬 ทุกสาขา</span>
+            </div>
+        </div>
+
+        <!-- Cards grid -->
+        <div id="announcementList" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;padding-bottom:24px;">
+            <div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--gray-400);">
+                <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+                <div style="font-weight:500;">กำลังโหลดข้อมูล...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== RIGHT COL ===== -->
+    <aside id="right-col">
+
+        <!-- Profile -->
+        <div class="glass section-card" style="padding:16px 18px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="profile-avatar">👤</div>
+                <div id="authProfile" style="flex:1;min-width:0;"></div>
+            </div>
+        </div>
+
+        <!-- Role info -->
+        <div class="glass section-card">
+            <div style="font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(203,213,225,0.5);padding-bottom:10px;">
+                🛡️ ระดับสิทธิ์การใช้งาน
+            </div>
+            <div class="role-row">
+                <div class="role-dot admin">A</div>
+                <div><strong>Admin</strong><br><span style="color:var(--gray-400);font-size:11px;">เพิ่ม ลบ แก้ไขได้ทั้งหมด</span></div>
+            </div>
+            <div class="role-row">
+                <div class="role-dot user">U</div>
+                <div><strong>User</strong><br><span style="color:var(--gray-400);font-size:11px;">เปิดลิงก์และแนบไฟล์ได้</span></div>
+            </div>
+            <div class="role-row">
+                <div class="role-dot viewer">V</div>
+                <div><strong>Viewer</strong><br><span style="color:var(--gray-400);font-size:11px;">ดูข้อมูลได้อย่างเดียว</span></div>
+            </div>
+        </div>
+
+        <!-- Branch notice -->
+        <div class="glass section-card" style="background:linear-gradient(135deg,rgba(255,247,237,0.9),rgba(255,237,213,0.7));">
+            <div style="font-size:12px;font-weight:700;color:var(--orange-600);margin-bottom:8px;">🏪 สาขาทั้งหมด</div>
+            <div style="font-size:11px;color:var(--gray-500);line-height:1.8;">
+                ระบบนี้ใช้สำหรับประสานงาน<br>ระหว่างทุกสาขาในเครือ<br>
+                <span style="color:var(--orange-500);font-weight:600;">ข้อมูลอัปเดตแบบ Real-time</span>
+            </div>
+        </div>
+
+    </aside>
+
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+        <button onclick="toggleModal('loginModal')" class="modal-close">✕</button>
+        <div class="modal-icon orange">🔐</div>
+        <h2 style="text-align:center;font-size:18px;font-weight:800;color:var(--gray-800);margin-bottom:4px;">เข้าสู่ระบบ</h2>
+        <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-bottom:20px;">กรุณาล็อกอินเพื่อใช้งานฟังก์ชันเพิ่มเติม</p>
+        <form id="loginForm" class="space-y-4" style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+                <label class="form-label">ชื่อผู้ใช้ (Username)</label>
+                <input type="text" id="loginUser" required class="field" placeholder="กรอก username">
+            </div>
+            <div>
+                <label class="form-label">รหัสผ่าน (Password)</label>
+                <input type="password" id="loginPass" required class="field" placeholder="กรอก password">
+            </div>
+            <p id="loginError" class="hidden" style="text-align:center;font-size:12px;color:#ef4444;background:#fef2f2;padding:8px;border-radius:8px;border:1px solid #fecaca;">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">ลงชื่อเข้าใช้</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Menu Modal -->
+<div id="menuModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+        <button onclick="toggleModal('menuModal')" class="modal-close">✕</button>
+        <div class="modal-icon orange" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);">📌</div>
+        <h2 style="text-align:center;font-size:17px;font-weight:800;color:var(--gray-800);margin-bottom:20px;">เพิ่มเมนูระบบ</h2>
+        <form id="menuForm" style="display:flex;flex-direction:column;gap:13px;">
+            <div>
+                <label class="form-label">ชื่อเมนู</label>
+                <input type="text" id="menuName" required class="field" placeholder="เช่น รายงานยอดขาย">
+            </div>
+            <div>
+                <label class="form-label">ไอคอน (Emoji)</label>
+                <input type="text" id="menuIcon" required class="field" placeholder="เช่น 📊">
+            </div>
+            <div>
+                <label class="form-label">ลิงก์ปลายทาง (URL)</label>
+                <input type="url" id="menuLink" required class="field" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn btn-lg btn-full" style="background:var(--gray-800);color:white;margin-top:4px;border-radius:12px;">บันทึกเมนู</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Announcement Modal -->
+<div id="announceModal" class="modal-backdrop hidden">
+    <div class="modal-box wide">
+        <button onclick="toggleModal('announceModal')" class="modal-close">✕</button>
+        <h2 style="font-size:18px;font-weight:800;color:var(--orange-600);margin-bottom:4px;">📢 สร้างประกาศ / งานใหม่</h2>
+        <p style="font-size:12px;color:var(--gray-400);margin-bottom:20px;">ประกาศจะแสดงผลแก่ทุกสาขาทันที</p>
+        <form id="announceForm" style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+                <label class="form-label">หัวข้อประกาศ <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="annTitle" required class="field" placeholder="เช่น งานประจำเดือนมิถุนายน">
+            </div>
+            <div>
+                <label class="form-label">รายละเอียด <span style="color:#ef4444;">*</span></label>
+                <textarea id="annContent" required rows="4" class="field" style="resize:vertical;" placeholder="อธิบายรายละเอียดงานหรือประกาศ..."></textarea>
+            </div>
+            <div class="form-section">
+                <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">📎 แนบลิงก์เอกสาร (ไม่บังคับ)</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div>
+                        <label class="form-label">URL เอกสาร / วิดีโอ</label>
+                        <input type="url" id="annLink" class="field" placeholder="วาง URL จาก Drive หรือ YouTube">
+                    </div>
+                    <div>
+                        <label class="form-label">ชื่อปุ่มลิงก์</label>
+                        <input type="text" id="annLinkName" class="field" placeholder="เช่น กดดูเอกสารคู่มือ">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">โพสต์ประกาศ</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxU7_w9v0sqAYxXFXCkWwZSAukM4f4EFdYB2G3AZu_9EAvf9_CDDT6uoCmymxwzP0gaJA/exec";
+    let announcements = [];
+    let menus = [];
+    let isSortNewestFirst = true;
+    let currentRole = localStorage.getItem('storeRole') || 'viewer';
+
+    function updateUIByRole() {
+        const adminEls = document.querySelectorAll('.admin-only');
+        const authProfile = document.getElementById('authProfile');
+
+        if (currentRole === 'admin') {
+            adminEls.forEach(el => el.classList.remove('hidden'));
+            authProfile.innerHTML = `
+                <div style="font-size:13px;font-weight:700;color:var(--orange-600);">👑 Admin</div>
+                <div style="font-size:11px;color:var(--gray-400);">ผู้ดูแลระบบ</div>
+                <button onclick="logout()" style="font-size:11px;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0;font-family:'Prompt',sans-serif;margin-top:2px;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--gray-400)'">ออกจากระบบ</button>
+            `;
+        } else if (currentRole === 'user') {
+            adminEls.forEach(el => el.classList.add('hidden'));
+            authProfile.innerHTML = `
+                <div style="font-size:13px;font-weight:700;color:var(--gray-700);">👤 พนักงาน</div>
+                <div style="font-size:11px;color:var(--gray-400);">User</div>
+                <button onclick="logout()" style="font-size:11px;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0;font-family:'Prompt',sans-serif;margin-top:2px;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--gray-400)'">ออกจากระบบ</button>
+            `;
+        } else {
+            adminEls.forEach(el => el.classList.add('hidden'));
+            authProfile.innerHTML = `
+                <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">สถานะ: ผู้เยี่ยมชม</div>
+                <button onclick="toggleModal('loginModal')" class="btn btn-primary btn-pill btn-sm">เข้าสู่ระบบ</button>
+            `;
+        }
+
+        renderMenus();
+        filterAnnouncements();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('loginUser').value;
+        const p = document.getElementById('loginPass').value;
+        const err = document.getElementById('loginError');
+        if (u === 'admin' && p === '1234') { currentRole = 'admin'; finishLogin(err, e.target); }
+        else if (u === 'user' && p === '1234') { currentRole = 'user'; finishLogin(err, e.target); }
+        else { err.classList.remove('hidden'); }
+    });
+
+    function finishLogin(errEl, formEl) {
+        localStorage.setItem('storeRole', currentRole);
+        errEl.classList.add('hidden');
+        formEl.reset();
+        toggleModal('loginModal');
+        updateUIByRole();
+    }
+
+    window.logout = function() {
+        if (confirm('ต้องการออกจากระบบหรือไม่?')) {
+            currentRole = 'viewer';
+            localStorage.setItem('storeRole', currentRole);
+            updateUIByRole();
+        }
+    }
+
+    window.viewerAlert = function(e) {
+        if (currentRole === 'viewer') {
+            e.preventDefault();
+            alert('⚠️ สำหรับพนักงานเท่านั้น! กรุณาเข้าสู่ระบบก่อน');
+        }
+    }
+
+    function loadMenus() {
+        const saved = localStorage.getItem('storeMenus');
+        if (saved) {
+            menus = JSON.parse(saved);
+        } else {
+            menus = [
+                { id: 1, name: 'หน้าหลัก', icon: '🏠', url: '#' },
+                { id: 2, name: 'คู่มือการทำงาน', icon: '📁', url: 'https://drive.google.com/drive/folders/1E8R4Bozgm4IXHMRWSNuh4GIYdExNxKXE?usp=sharing' }
+            ];
+            saveMenus();
+        }
+    }
+
+    function saveMenus() { localStorage.setItem('storeMenus', JSON.stringify(menus)); }
+
+    function renderMenus() {
+        const container = document.getElementById('dynamicMenuContainer');
+        container.innerHTML = '';
+        menus.forEach(menu => {
+            const isViewer = currentRole === 'viewer';
+            const href = isViewer ? '#' : menu.url;
+            const linkClick = isViewer ? 'onclick="viewerAlert(event)"' : '';
+            const isActive = menu.url === '#' ? 'active' : '';
+            const disabledCls = isViewer ? 'disabled-link' : '';
+
+            const el = `
+                <div style="position:relative;">
+                    <a href="${href}" target="${(!isViewer && menu.url !== '#') ? '_blank' : '_self'}" ${linkClick}
+                       class="menu-item ${isActive} ${disabledCls}">
+                        <span class="icon">${menu.icon}</span>
+                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${menu.name}</span>
+                    </a>
+                    ${(currentRole === 'admin' && menu.id > 2) ? `
+                        <button onclick="deleteMenu(${menu.id})" class="delete-btn" title="ลบเมนู">✕</button>
+                    ` : ''}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', el);
+        });
+    }
+
+    window.deleteMenu = function(id) {
+        if (confirm('ลบเมนูนี้?')) { menus = menus.filter(m => m.id !== id); saveMenus(); renderMenus(); }
+    }
+
+    document.getElementById('menuForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        menus.push({
+            id: Date.now(),
+            name: document.getElementById('menuName').value,
+            icon: document.getElementById('menuIcon').value,
+            url: document.getElementById('menuLink').value
+        });
+        saveMenus(); renderMenus(); e.target.reset(); toggleModal('menuModal');
+    });
+
+    async function fetchAnnouncements() {
+        const cached = localStorage.getItem('storeAnns');
+        if (cached) { announcements = JSON.parse(cached); filterAnnouncements(); }
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            if (data && Array.isArray(data)) {
+                announcements = data;
+                localStorage.setItem('storeAnns', JSON.stringify(data));
+                filterAnnouncements();
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    window.filterAnnouncements = function() {
+        const text = (document.getElementById('searchInput').value || '').toLowerCase();
+        const list = document.getElementById('announcementList');
+        list.innerHTML = '';
+
+        let data = announcements.filter(a =>
+            (a.Title || a.title || '').toLowerCase().includes(text) ||
+            (a.Content || a.content || '').toLowerCase().includes(text)
+        );
+
+        document.getElementById('totalTasksCount').textContent = data.length;
+
+        if (data.length === 0) {
+            list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--gray-400);">
+                <div style="font-size:36px;margin-bottom:10px;">🔍</div>
+                <div style="font-weight:500;">ไม่พบข้อมูล</div>
+            </div>`;
+            return;
+        }
+
+        data.sort((a, b) => {
+            const tA = new Date(a.Timestamp || a.timestamp || 0).getTime();
+            const tB = new Date(b.Timestamp || b.timestamp || 0).getTime();
+            return isSortNewestFirst ? (tB - tA) : (tA - tB);
+        });
+
+        data.forEach((ann, idx) => {
+            const title = ann.Title || ann.title || '';
+            const content = ann.Content || ann.content || '';
+            const link = ann.Link || ann.Url || ann.link || ann.url || '';
+            const linkName = ann.LinkName || 'เปิดเอกสาร';
+            let timeStr = 'เพิ่งโพสต์';
+            if (ann.Timestamp || ann.timestamp) {
+                const d = new Date(ann.Timestamp || ann.timestamp);
+                if (!isNaN(d.getTime())) timeStr = d.toLocaleDateString('th-TH');
+            }
+
+            const isViewer = currentRole === 'viewer';
+            let linkHTML = '';
+            if (link) {
+                const href = isViewer ? '#' : link;
+                const lc = isViewer ? 'onclick="viewerAlert(event)"' : '';
+                const dc = isViewer ? 'disabled' : '';
+                // Detect link type for icon
+                const isYT = link.includes('youtube') || link.includes('youtu.be');
+                const isDrive = link.includes('drive.google') || link.includes('docs.google');
+                let svgIcon = '';
+                if (isYT) {
+                    svgIcon = `<svg class="link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+                } else if (isDrive) {
+                    svgIcon = `<svg class="link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4.433 22.396l2.898-5.023H22.41l-2.898 5.023H4.433zm-.205-.357L1.59 17.016l7.615-13.18 2.638 4.573-7.615 13.63zm15.446-5.38H8.438L3.25 8.072h11.232l5.192 8.587z"/></svg>`;
+                } else {
+                    svgIcon = `<svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`;
+                }
+                linkHTML = `
+                    <div class="ann-link-wrap">
+                        <a href="${href}" target="${!isViewer ? '_blank' : '_self'}" ${lc} class="ann-link ${dc}">
+                            ${svgIcon}
+                            <span>${linkName}</span>
+                            <svg class="link-icon" style="margin-left:auto;opacity:0.7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>`;
+            }
+
+            list.insertAdjacentHTML('beforeend', `
+                <div class="ann-card" style="animation-delay:${idx * 0.05}s">
+                    <div class="ann-card-accent"></div>
+                    <div class="ann-card-glow"></div>
+                    <div class="ann-card-inner">
+                        <div class="ann-date">
+                            <span class="ann-date-dot"></span>
+                            ${timeStr}
+                        </div>
+                        <h3 class="ann-title">${title}</h3>
+                        <p class="ann-body">${content}</p>
+                        ${linkHTML}
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    window.toggleSort = function() {
+        isSortNewestFirst = !isSortNewestFirst;
+        document.getElementById('sortIcon').textContent = isSortNewestFirst ? '🔽' : '🔼';
+        document.getElementById('sortText').textContent = isSortNewestFirst ? 'ล่าสุด' : 'เก่าสุด';
+        filterAnnouncements();
+    }
+
+    document.getElementById('announceForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.innerHTML = '⏳ กำลังบันทึก...'; btn.disabled = true;
+
+        const title = document.getElementById('annTitle').value;
+        const content = document.getElementById('annContent').value;
+        const link = document.getElementById('annLink').value;
+        const linkName = document.getElementById('annLinkName').value || 'เปิดเอกสาร';
+
+        const fd = new FormData();
+        fd.append('title', title); fd.append('content', content);
+        fd.append('link', link); fd.append('linkName', linkName);
+
+        announcements.unshift({ Title: title, Content: content, Link: link, LinkName: linkName, Timestamp: new Date().toISOString() });
+        filterAnnouncements();
+
+        try {
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: fd });
+            localStorage.setItem('storeAnns', JSON.stringify(announcements));
+        } catch(err) { console.error(err); }
+        finally {
+            e.target.reset(); btn.innerHTML = 'โพสต์ประกาศ'; btn.disabled = false;
+            toggleModal('announceModal');
+        }
+    });
+
+    window.toggleModal = function(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    loadMenus();
+    updateUIByRole();
+    fetchAnnouncements();
+</script>
+</body>
+</html>
